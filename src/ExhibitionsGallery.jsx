@@ -7,11 +7,8 @@ import {
     startTransition,
 } from "react"
 
-// Convertito da Framer Code Component a componente React standalone.
-// Rimossi: import { addPropertyControls } from "framer", la addPropertyControls(...)
-// finale, l'interface MyComponentProps (vuota, non serve più) e i commenti
-// @framerSupportedLayoutWidth/Height (validi solo dentro Framer).
-
+// --- DATI DELLE MOSTRINE ---
+// Ho mantenuto i tuoi dati originali.
 const EXHIBITIONS = [
     {
         image: "https://framerusercontent.com/images/fmFTgvoz3alGQypONavsu2dXjGA.jpg?width=12600&height=8400&kb=1931",
@@ -73,6 +70,12 @@ const EXHIBITIONS = [
     },
 ]
 
+// --- CONFIGURAZIONE STILI ---
+// Ho centralizzato qui le definizioni per Aeonik/Sans-Serif pulito
+const FONT_FAMILY = "Inter, Helvetica, Arial, sans-serif" // Sostituire con 'Aeonik' se configurato
+const COLOR_BLACK = "#000000"
+const COLOR_WHITE = "#FFFFFF"
+
 export default function ExhibitionsGallery() {
     const [activeIndex, setActiveIndex] = useState(0)
     const [isPhone, setIsPhone] = useState(false)
@@ -84,11 +87,14 @@ export default function ExhibitionsGallery() {
         startScrollLeft: 0,
     })
 
-    const gap = isPhone ? 12 : 20
-    const horizontalGutter = isPhone ? 14 : 36
-    const headerReserved = isPhone ? 72 : 96
-    const galleryHeight = isPhone ? "50vh" : "58vh"
+    // Dimensioni responsive aggiornate per pulizia
+    const gap = isPhone ? 12 : 28 // Più spazio tra le opere su desktop
+    const horizontalGutter = isPhone ? 16 : 48
+    const headerReserved = isPhone ? 72 : 100
+    // Altezza galleria ridotta per desktop per avvicinarsi al riferimento
+    const galleryHeight = isPhone ? "60vh" : "55vh"
 
+    // Gestione Responsive
     useEffect(() => {
         if (typeof window === "undefined") return
         const onResize = () => {
@@ -101,6 +107,7 @@ export default function ExhibitionsGallery() {
         return () => window.removeEventListener("resize", onResize)
     }, [])
 
+    // Logica per individuare l'elemento centrato
     const updateCenteredItem = useCallback(() => {
         if (typeof window === "undefined") return
         if (!scrollerRef.current) return
@@ -125,6 +132,7 @@ export default function ExhibitionsGallery() {
         })
     }, [])
 
+    // Listener per lo scroll e resize
     useEffect(() => {
         if (typeof window === "undefined") return
         const scroller = scrollerRef.current
@@ -136,7 +144,7 @@ export default function ExhibitionsGallery() {
             rafId = window.requestAnimationFrame(updateCenteredItem)
         }
 
-        scroller.addEventListener("scroll", onScroll)
+        scroller.addEventListener("scroll", onScroll, { passive: true })
         window.addEventListener("resize", onScroll)
         onScroll()
         return () => {
@@ -146,12 +154,14 @@ export default function ExhibitionsGallery() {
         }
     }, [updateCenteredItem])
 
+    // Interazione: Rotella del Mouse (Wheel)
     const onWheel = useCallback((event) => {
         if (!scrollerRef.current) return
-        event.preventDefault()
+        // No event.preventDefault() qui per permettere lo scroll nativo orizzontale se il trackpad lo gestisce
         scrollerRef.current.scrollLeft += event.deltaY + event.deltaX
     }, [])
 
+    // Interazione: Trascinamento (Drag/Pointer)
     const onPointerDown = useCallback((event) => {
         if (!scrollerRef.current) return
         dragStateRef.current.dragging = true
@@ -178,43 +188,83 @@ export default function ExhibitionsGallery() {
         [activeIndex]
     )
 
+    // Stile comune per i link dell'header/footer
+    const navLinkStyle = {
+        textDecoration: "none",
+        color: COLOR_BLACK,
+        textTransform: "uppercase",
+        letterSpacing: "0.7px",
+        fontFamily: FONT_FAMILY,
+        fontWeight: 500,
+        fontSize: isPhone ? 13 : 15,
+        cursor: "pointer",
+        pointerEvents: "auto", // Riabilita i click sopra l'area z-index
+    }
+
     return (
         <main
             style={{
                 position: "relative",
                 width: "100%",
-                height: "100%",
-                minHeight: "100vh",
-                background: "#FFFFFF",
-                overflow: "hidden",
-                color: "#000000",
+                height: "100vh", // Pagina fissa a 100vh
+                background: COLOR_WHITE, // Full White Mode
+                overflow: "hidden", // No scrolling verticale di pagina
+                color: COLOR_BLACK,
             }}
         >
-            <div
+            {/* --- HEADER FISSO (Uguale alla Home) --- */}
+            <header
                 style={{
                     position: "fixed",
-                    inset: 0,
-                    background: "#FFFFFF",
-                    zIndex: 0,
-                }}
-                aria-hidden="true"
-            />
-
-            <section
-                style={{
-                    position: "relative",
-                    zIndex: 1,
+                    top: 0,
+                    left: 0,
                     width: "100%",
-                    height: "100%",
-                    minHeight: "100vh",
+                    height: headerReserved,
+                    paddingLeft: horizontalGutter,
+                    paddingRight: horizontalGutter,
                     display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    paddingTop: headerReserved,
-                    paddingBottom: isPhone ? 42 : 52,
+                    alignItems: "center",
+                    justifyContent: "space-between", // Distribuzione automatica
                     boxSizing: "border-box",
+                    zIndex: 10, // Sopra la galleria
+                    pointerEvents: "none", // Lascia passare i click se non su link
                 }}
             >
+                <a href="/" style={navLinkStyle}>
+                    CLAUDIA MANGONE
+                </a>
+                
+                {/* EXHIBITIONS centrato, statico */}
+                <div
+                    style={{
+                        ...navLinkStyle,
+                        position: "absolute",
+                        left: "52%", // APPENA DOPO il CENTRO
+                        transform: "translateX(-50%)",
+                        cursor: "default",
+                    }}
+                >
+                    EXHIBITIONS
+                </div>
+                
+                {/* Spaziatore vuoto a destra per bilanciare la flexbox se contacts è nel footer */}
+                <div style={{ width: isPhone ? 50 : 100 }} aria-hidden="true" />
+            </header>
+
+            {/* --- CONTENUTO PRINCIPALE (Galleria) --- */}
+            <section
+                style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center", // Galleria centrata verticalmente
+                    paddingTop: headerReserved,
+                    boxSizing: "border-box",
+                    zIndex: 1,
+                }}
+            >
+                {/* Container Scroller orizzontale */}
                 <div
                     ref={scrollerRef}
                     onWheel={onWheel}
@@ -224,11 +274,11 @@ export default function ExhibitionsGallery() {
                     onPointerCancel={onPointerUp}
                     style={{
                         width: "100%",
-                        overflowX: "auto",
+                        overflowX: "auto", // Scroll orizzontale nativo
                         overflowY: "hidden",
-                        scrollbarWidth: "none",
-                        msOverflowStyle: "none",
-                        touchAction: "pan-x",
+                        scrollbarWidth: "none", // Nasconde scrollbar Firefox
+                        msOverflowStyle: "none", // Nasconde scrollbar IE
+                        touchAction: "pan-x", // Gestione touch orizzontale
                         cursor: dragStateRef.current.dragging
                             ? "grabbing"
                             : "grab",
@@ -237,12 +287,15 @@ export default function ExhibitionsGallery() {
                         boxSizing: "border-box",
                     }}
                 >
+                    {/* Inner Flexbox per le immagini */}
                     <div
                         style={{
                             display: "inline-flex",
                             alignItems: "center",
                             gap,
                             minHeight: galleryHeight,
+                            // Padding extra alla fine per permettere all'ultima foto di centrarsi
+                            paddingRight: isPhone ? "25vw" : "35vw", 
                         }}
                     >
                         {EXHIBITIONS.map((item, index) => (
@@ -253,9 +306,10 @@ export default function ExhibitionsGallery() {
                                 }}
                                 style={{
                                     height: galleryHeight,
-                                    width: isPhone ? "72vw" : "62vw",
-                                    maxWidth: isPhone ? 520 : 980,
-                                    minWidth: isPhone ? 236 : 420,
+                                    // Dimensioni proporzionali al riferimento
+                                    width: isPhone ? "75vw" : "58vw",
+                                    maxWidth: isPhone ? 580 : 1100,
+                                    minWidth: isPhone ? 280 : 500,
                                     flex: "0 0 auto",
                                 }}
                             >
@@ -266,13 +320,79 @@ export default function ExhibitionsGallery() {
                                     style={{
                                         width: "100%",
                                         height: "100%",
-                                        objectFit: "cover",
+                                        objectFit: "cover", // O "contain" se preferisci non ritagliare nulla
                                         userSelect: "none",
                                         display: "block",
                                     }}
                                 />
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* --- CASELLA DIDASCALIE FISSA (Sotto la galleria, a sinistra) --- */}
+                <div
+                    style={{
+                        position: "absolute",
+                        bottom: isPhone ? 60 : 66, // Sopra il footer
+                        left: horizontalGutter,
+                        width: "min(480px, 100% - 32px)",
+                        boxSizing: "border-box",
+                        zIndex: 2,
+                        userSelect: "none",
+                    }}
+                >
+                    <div
+                        style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: isPhone ? 12 : 13, // Più piccolo del header
+                            lineHeight: 1.45,
+                            letterSpacing: "0em",
+                            fontWeight: 500,
+                            marginBottom: 4,
+                            textTransform: "uppercase",
+                        }}
+                    >
+                        {activeItem.title}
+                    </div>
+                    <div
+                        style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: isPhone ? 11 : 12, // Più piccolo del header
+                            lineHeight: 1.55,
+                            letterSpacing: "0.01em",
+                            fontWeight: 400,
+                            color: "rgba(0,0,0,0.7)", // Leggermente sbiadito per gerarchia
+                        }}
+                    >
+                        {activeItem.description}
+                    </div>
+                </div>
+            </section>
+
+            {/* --- FOOTER A DESTRA (Uguale alla Home) --- */}
+            <footer
+                style={{
+                    position: "fixed",
+                    bottom: 0,
+                    right: 0,
+                    width: "auto",
+                    height: isPhone ? 50 : 60,
+                    paddingRight: horizontalGutter,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                    boxSizing: "border-box",
+                    zIndex: 10, // Sopra la galleria
+                }}
+            >
+                <a href="/contact" style={navLinkStyle}>
+                    CONTACTS
+                </a>
+            </footer>
+        </main>
+    )
+}
                     </div>
                 </div>
 
