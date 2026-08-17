@@ -33,3 +33,117 @@ export default function CustomCursor() {
         )
         const update = () =>
             startTransition(() => setCanHover(mediaQuery.matches))
+        update()
+        mediaQuery.addEventListener("change", update)
+        return () => mediaQuery.removeEventListener("change", update)
+    }, [])
+
+    useEffect(() => {
+        if (typeof document === "undefined" || !canHover) return
+
+        const styleTag = document.createElement("style")
+        styleTag.setAttribute("data-custom-cursor", "true")
+        styleTag.innerHTML = "* { cursor: none !important; }"
+        document.head.appendChild(styleTag)
+
+        return () => {
+            styleTag.remove()
+        }
+    }, [canHover])
+
+    useEffect(() => {
+        if (
+            typeof window === "undefined" ||
+            typeof document === "undefined" ||
+            !canHover
+        )
+            return
+
+        const onMouseMove = (event) => {
+            startTransition(() => {
+                setCursorX(event.clientX)
+                setCursorY(event.clientY)
+                setIsVisible(true)
+            })
+        }
+
+        const onMouseOver = (event) => {
+            const target = event.target
+            const linkEl = target?.closest?.(
+                "a, button, [role='menuitem'], [data-cursor-hover]"
+            )
+            startTransition(() => setIsOverLink(Boolean(linkEl)))
+        }
+
+        const onClick = () => {
+            startTransition(() => setPulseCount((prev) => prev + 1))
+        }
+
+        const onMouseLeaveWindow = () => {
+            startTransition(() => setIsVisible(false))
+        }
+
+        window.addEventListener("mousemove", onMouseMove)
+        document.addEventListener("mouseover", onMouseOver)
+        document.addEventListener("click", onClick)
+        document.addEventListener("mouseleave", onMouseLeaveWindow)
+
+        return () => {
+            window.removeEventListener("mousemove", onMouseMove)
+            document.removeEventListener("mouseover", onMouseOver)
+            document.removeEventListener("click", onClick)
+            document.removeEventListener("mouseleave", onMouseLeaveWindow)
+        }
+    }, [canHover])
+
+    if (!canHover || !isVisible) return null
+    if (typeof document === "undefined") return null
+
+    return createPortal(
+        <motion.div
+            aria-hidden="true"
+            initial={false}
+            animate={{ scale: isOverLink ? 1.35 : 1 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            style={{
+                position: "fixed",
+                left: cursorX,
+                top: cursorY,
+                transform: "translate(-50%, -50%)",
+                zIndex: 9999,
+                pointerEvents: "none",
+                color: "#FFFFFF",
+                mixBlendMode: "difference",
+                fontSize: 17.6,
+                lineHeight: 1,
+                whiteSpace: "nowrap",
+            }}
+        >
+            <motion.span
+                initial={false}
+                animate={
+                    isOverLink ? { scale: [1, 1.1, 1] } : { scale: 1 }
+                }
+                transition={{
+                    duration: 0.85,
+                    repeat: isOverLink ? Infinity : 0,
+                    ease: "easeInOut",
+                }}
+                style={{ display: "inline-block" }}
+            >
+                <motion.span
+                    key={pulseCount}
+                    initial={false}
+                    animate={
+                        pulseCount > 0 ? { scale: [1, 1.22, 1] } : { scale: 1 }
+                    }
+                    transition={{ duration: 0.36, ease: "easeInOut" }}
+                    style={{ display: "inline-block" }}
+                >
+                    ❥
+                </motion.span>
+            </motion.span>
+        </motion.div>,
+        document.body
+    )
+}
