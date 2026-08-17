@@ -7,5 +7,5 @@ import react from "@vitejs/plugin-react"
 // all'inizio che alla fine.
 export default defineConfig({
   plugins: [react()],
-  base: "/NOME-REPOSITORY/",
+  base: "/prtfl/",
 })
