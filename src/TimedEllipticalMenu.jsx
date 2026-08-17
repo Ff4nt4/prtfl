@@ -18,12 +18,12 @@ const MENU_ITEMS = [
     {
         label: "SELECTED WORKS",
         href: "/selected-works",
-        left: "30%",
-        top: "30%",
+        left: "20%",
+        top: "20%",
     },
-    { label: "EXHIBITIONS", href: "/exhibitions", left: "50%", top: "38%" },
+    { label: "EXHIBITIONS", href: "/exhibitions", left: "45%", top: "38%" },
     { label: "CONTACTS", href: "/contact", left: "80%", top: "50%" },
-    { label: "DOWNLOAD PORTFOLIO", href: "/clouds", left: "69%", top: "70%" },
+    { label: "DOWNLOAD PORTFOLIO", href: "/clouds", left: "63%", top: "70%" },
 ]
 
 const VIDEO_SOURCES = {
@@ -486,7 +486,7 @@ export default function TimedEllipticalMenu({
                         left: downloadPopupPosition.left,
                         top: downloadPopupPosition.top,
                         width: "min(96px, calc(100vw - 20px))",
-                        background: "rgba(0, 0, 0, 0.6)",
+                        background: "rgba(0, 0, 0, 0.25)",
                         padding: "6px 8px",
                         display: "flex",
                         flexDirection: "row",
@@ -504,7 +504,7 @@ export default function TimedEllipticalMenu({
                         style={{
                             color: "#FFFFFF",
                             textDecoration: "none",
-                            padding: "3px 0",
+                            padding: "5px 0",
                             textAlign: "center",
                             letterSpacing: "0.6px",
                             textTransform: "uppercase",
@@ -522,7 +522,7 @@ export default function TimedEllipticalMenu({
                         style={{
                             color: "#FFFFFF",
                             textDecoration: "none",
-                            padding: "4px 0",
+                            padding: "5px 0",
                             textAlign: "center",
                             letterSpacing: "0.6px",
                             textTransform: "uppercase",
