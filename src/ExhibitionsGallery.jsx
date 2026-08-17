@@ -126,6 +126,10 @@ export default function ExhibitionsGallery() {
     // sotto), cosi' le foto si dispongono piu' in alto, centrate esattamente
     // a meta' tra il fondo dell'intestazione e l'inizio di questa fascia.
     const bottomReservedHeight = isPhone ? 90 : 110
+    // Piccolo margine aggiuntivo SOLO per allontanare un po' le didascalie
+    // dalle foto, senza toccare bottomReservedHeight (che definisce la
+    // fascia della galleria, gia' corretta cosi' com'e').
+    const captionsExtraGap = isPhone ? 14 : 18
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -381,13 +385,16 @@ export default function ExhibitionsGallery() {
                 quante righe occupa la descrizione sotto.
                 Allineate lateralmente sull'asse verticale centrale (50vw),
                 lo stesso su cui si dispone la foto attiva/centrata.
-                Stampatello minuscolo (non piu' maiuscolo), sans-serif
-                Helvetica, peso medium, 9px. --- */}
+                Testo tornato al casing originale (maiuscole/minuscole
+                come scritte in EXHIBITIONS, niente piu' lowercase forzato),
+                sans-serif Helvetica, peso medium, 12px, interlinea piu'
+                stretta, e un piccolo margine in piu' rispetto alle foto
+                (captionsExtraGap) qui sopra. --- */}
             <div
                 style={{
                     position: "fixed",
                     left: "50vw",
-                    top: `calc(100vh - ${bottomReservedHeight}px)`,
+                    top: `calc(100vh - ${bottomReservedHeight}px + ${captionsExtraGap}px)`,
                     width: `calc(50vw - ${horizontalGutter}px)`,
                     boxSizing: "border-box",
                     zIndex: 5,
@@ -397,12 +404,11 @@ export default function ExhibitionsGallery() {
                 <div
                     style={{
                         fontFamily: "Helvetica, Arial, sans-serif",
-                        fontSize: 9,
-                        lineHeight: 1.25,
+                        fontSize: 12,
+                        lineHeight: 1.1,
                         letterSpacing: "0em",
                         fontWeight: 500,
                         fontStyle: "normal",
-                        textTransform: "lowercase",
                         marginBottom: 4,
                     }}
                 >
@@ -411,12 +417,11 @@ export default function ExhibitionsGallery() {
                 <div
                     style={{
                         fontFamily: "Helvetica, Arial, sans-serif",
-                        fontSize: 9,
-                        lineHeight: 1.3,
+                        fontSize: 12,
+                        lineHeight: 1.15,
                         letterSpacing: "0.01em",
                         fontWeight: 500,
                         fontStyle: "normal",
-                        textTransform: "lowercase",
                         color: "rgba(0,0,0,0.7)",
                     }}
                 >
