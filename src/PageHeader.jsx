@@ -30,15 +30,17 @@ export default function PageHeader({ centerLabel }) {
         return () => window.removeEventListener("resize", onResize)
     }, [])
 
-    const horizontalGutter = isPhone ? 16 : 48
+    // Distanza dai bordi laterali aumentata di poco (16/48 -> 20/56).
+    const horizontalGutter = isPhone ? 20 : 56
     const headerHeight = isPhone ? 72 : 100
-    // Testo piu' in alto rispetto a prima: non piu' centrato verticalmente
-    // nella fascia header, ma ancorato vicino al bordo superiore con un
-    // piccolo padding fisso. Essendo lo stesso valore per ogni pagina che
-    // monta questo componente, il punto resta identico ovunque.
-    const headerTopOffset = isPhone ? 20 : 26
+    // Distanza dal bordo superiore ridotta al minimo (20/26 -> 10/12):
+    // un piccolo margine resta per non far toccare letteralmente il testo
+    // al bordo della pagina. Stesso valore per ogni pagina che monta
+    // questo componente, quindi il punto resta identico ovunque.
+    const headerTopOffset = isPhone ? 10 : 12
 
-    // Font piu' grande di un punto rispetto a prima (13/15 -> 14/16).
+    // Font almeno 18px, come richiesto per tutte le scritte in maiuscolo
+    // di header, footer e homepage.
     const navLinkStyle = {
         textDecoration: "none",
         color: COLOR_BLACK,
@@ -46,7 +48,7 @@ export default function PageHeader({ centerLabel }) {
         letterSpacing: "0.7px",
         fontFamily: FONT_FAMILY,
         fontWeight: 500,
-        fontSize: isPhone ? 14 : 16,
+        fontSize: 18,
         cursor: "pointer",
         pointerEvents: "auto",
     }

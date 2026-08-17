@@ -134,9 +134,12 @@ export default function TimedEllipticalMenu({
         isPhone,
         phoneMaxLabelWidth,
     ])
+    // Il limite minimo del clamp non deve mai scendere sotto i 18px,
+    // nemmeno su schermi molto stretti: prima poteva restringersi fino
+    // a "fontSize * 0.8", ora il pavimento e' sempre 18px.
     const computedFontSize = useMemo(() => {
-        if (!isPhone) return `${fontSize}px`
-        return `clamp(${Math.max(11, fontSize * 0.8)}px, ${Math.max(3.2, fontSize * 0.9)}vw, ${fontSize}px)`
+        if (!isPhone) return `${Math.max(18, fontSize)}px`
+        return `clamp(${Math.max(18, fontSize * 0.8)}px, ${Math.max(3.2, fontSize * 0.9)}vw, ${Math.max(18, fontSize)}px)`
     }, [fontSize, isPhone])
     const activeDurationMs = 3000
 
@@ -499,7 +502,7 @@ export default function TimedEllipticalMenu({
                         position: "fixed",
                         left: downloadPopupPosition.left,
                         top: downloadPopupPosition.top,
-                        width: "min(96px, calc(100vw - 20px))",
+                        width: "min(120px, calc(100vw - 20px))",
                         background: "rgba(0, 0, 0, 0.25)",
                         padding: "6px 8px",
                         display: "flex",
@@ -523,7 +526,7 @@ export default function TimedEllipticalMenu({
                             letterSpacing: "0.6px",
                             textTransform: "uppercase",
                             fontFamily: "Inter, Helvetica, Arial, sans-serif", // Stesso font del menu
-                            fontSize: "14px", // Leggermente più piccolo del menu principale per gerarchia
+                            fontSize: "18px", // Almeno 18px come le altre scritte in maiuscolo
                         }}
                     >
                         ITA
@@ -541,7 +544,7 @@ export default function TimedEllipticalMenu({
                             letterSpacing: "0.6px",
                             textTransform: "uppercase",
                             fontFamily: "Inter, Helvetica, Arial, sans-serif", // Stesso font del menu
-                            fontSize: "14px", // Leggermente più piccolo del menu principale per gerarchia
+                            fontSize: "18px", // Almeno 18px come le altre scritte in maiuscolo
                         }}
                     >
                         ENG

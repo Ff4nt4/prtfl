@@ -104,6 +104,9 @@ export default function ExhibitionsGallery() {
 
     const gap = isPhone ? 12 : 28
     const horizontalGutter = isPhone ? 16 : 48
+    // Gutter dedicato al footer (CONTACTS): distanza dal bordo destro
+    // aumentata di poco rispetto al resto del layout della galleria.
+    const footerEdgeGutter = isPhone ? 20 : 56
     const headerReserved = isPhone ? 72 : 100
     // Foto ingrandite del 50% rispetto a prima (36vh/34vh -> 54vh/51vh),
     // sempre alla stessa altezza tra loro.
@@ -205,7 +208,7 @@ export default function ExhibitionsGallery() {
         letterSpacing: "0.7px",
         fontFamily: FONT_FAMILY,
         fontWeight: 500,
-        fontSize: isPhone ? 13 : 15,
+        fontSize: 18,
         cursor: "pointer",
         pointerEvents: "auto",
     }
@@ -358,17 +361,21 @@ export default function ExhibitionsGallery() {
                 </div>
             </div>
 
-            {/* --- FOOTER A DESTRA --- */}
+            {/* --- FOOTER A DESTRA ---
+                Distanza dal bordo inferiore ridotta al minimo (allineamento
+                in fondo con un piccolo padding, non piu' centrato in una
+                fascia di 50/60px) e distanza dal bordo destro aumentata
+                di poco tramite footerEdgeGutter. --- */}
             <footer
                 style={{
                     position: "fixed",
                     bottom: 0,
                     right: 0,
                     width: "auto",
-                    height: isPhone ? 50 : 60,
-                    paddingRight: horizontalGutter,
+                    paddingRight: footerEdgeGutter,
+                    paddingBottom: isPhone ? 10 : 12,
                     display: "flex",
-                    alignItems: "center",
+                    alignItems: "flex-end",
                     justifyContent: "flex-end",
                     boxSizing: "border-box",
                     zIndex: 10,
