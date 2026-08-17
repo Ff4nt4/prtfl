@@ -333,7 +333,11 @@ export default function TimedEllipticalMenu({
                     style={{
                         position: "absolute",
                         inset: 0,
-                        background: "rgba(0, 0, 0, 0.6)",
+                        // Layer scurente ridotto (0.6 -> 0.25): i colori dei
+                        // video restano molto piu' vicini all'originale,
+                        // mantenendo comunque un minimo di leggibilita' per
+                        // il testo bianco sovrapposto.
+                        background: "rgba(0, 0, 0, 0.25)",
                     }}
                 />
             </div>
@@ -409,15 +413,22 @@ export default function TimedEllipticalMenu({
                 }}
                 aria-label={`Open ${activeItem.label}`}
             >
-                {/* Marker (rettangolo) + testo ora ruotano INSIEME, come
-                    un unico blocco, attorno all'asse orizzontale che
-                    taglia le lettere a metà (rotateX). */}
+                {/* Marker (rettangolo) + testo ruotano INSIEME al click,
+                    attorno all'asse orizzontale (rotateX) - questo e'
+                    l'effetto "si avvitano su se stesse" al click.
+                    IMPORTANTE: niente piu' key={twistCount} qui. Con la key
+                    l'intero blocco (marker compreso) veniva SMONTATO e
+                    RIMONTATO ad ogni click, e questo faceva ripartire anche
+                    l'animazione di allargamento del marker qui sotto - che
+                    invece deve animarsi SOLO quando cambia la voce attiva
+                    (key={`${activeIndex}-${markerWidth}`}), non ad ogni
+                    click. Usando un valore di rotazione cumulativo
+                    (twistCount * 360) invece della key, il blocco resta
+                    montato: il click continua a farlo girare su se stesso,
+                    ma il marker sotto non viene piu' "risvegliato" a torto. */}
                 <motion.span
-                    key={`${twistCount}`}
                     initial={false}
-                    animate={
-                        twistCount > 0 ? { rotateX: [0, 360] } : { rotateX: 0 }
-                    }
+                    animate={{ rotateX: twistCount * 360 }}
                     transition={{ duration: 0.75, ease: "easeInOut" }}
                     style={{
                         display: "inline-flex",
@@ -509,7 +520,9 @@ export default function TimedEllipticalMenu({
                         flexDirection: "row",
                         justifyContent: "center",
                         alignItems: "center",
-                        gap: 10,
+                        // Spaziatura tra ITA ed ENG aumentata (10 -> 22),
+                        // a parita' di larghezza del pop-up.
+                        gap: 22,
                         zIndex: 10002,
                     }}
                 >
