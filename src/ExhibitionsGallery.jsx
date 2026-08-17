@@ -80,7 +80,7 @@ const EXHIBITIONS = [
         image: img10,
         title: "ECAL Talent Days (2023)",
         description:
-            "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - RENENS, LAUSANNE (CH)",
+            "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - Renens, Lausanne (CH)",
     },
 ]
 
@@ -103,9 +103,10 @@ export default function ExhibitionsGallery() {
     const gap = isPhone ? 12 : 28
     const horizontalGutter = isPhone ? 16 : 48
     const headerReserved = isPhone ? 72 : 100
-    // Dimensione ridotta rispetto a prima: le foto sono piu' piccole ma
-    // tutte alla STESSA altezza (uniformita'), senza essere tagliate.
-    const galleryHeight = isPhone ? "36vh" : "34vh"
+    // Foto ingrandite del 50% rispetto a prima (36vh/34vh -> 54vh/51vh),
+    // sempre alla stessa altezza tra loro.
+    const galleryHeight = isPhone ? "54vh" : "51vh"
+    const footerHeight = isPhone ? 50 : 60
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -262,9 +263,6 @@ export default function ExhibitionsGallery() {
                     inset: 0,
                     display: "flex",
                     flexDirection: "column",
-                    // "center" verticalmente sull'insieme galleria+didascalia,
-                    // non solo sulla galleria: cosi' la didascalia resta
-                    // sempre visibile sotto le foto, mai sovrapposta.
                     justifyContent: "center",
                     paddingTop: headerReserved,
                     boxSizing: "border-box",
@@ -289,7 +287,10 @@ export default function ExhibitionsGallery() {
                         cursor: dragStateRef.current.dragging
                             ? "grabbing"
                             : "grab",
-                        paddingLeft: horizontalGutter,
+                        // A riposo (scrollLeft 0) la prima foto parte
+                        // esattamente dal centro orizzontale della pagina,
+                        // non dal margine sinistro.
+                        paddingLeft: "50vw",
                         paddingRight: horizontalGutter,
                         boxSizing: "border-box",
                     }}
@@ -324,7 +325,7 @@ export default function ExhibitionsGallery() {
                                     alt={item.title}
                                     draggable={false}
                                     style={{
-                                        height: "150%",
+                                        height: "100%",
                                         width: "auto",
                                         // Limite di larghezza solo per le
                                         // foto molto panoramiche: objectFit
@@ -341,46 +342,49 @@ export default function ExhibitionsGallery() {
                         ))}
                     </div>
                 </div>
+            </section>
 
-                {/* --- DIDASCALIE (nel flusso, sotto la galleria: mai in
-                    sovrapposizione con le foto) --- */}
+            {/* --- DIDASCALIE: fisse appena sopra il footer, cosi' la
+                galleria sopra ha tutto lo spazio verticale disponibile.
+                Piu' larghe di prima: vanno a capo solo a meta' pagina. --- */}
+            <div
+                style={{
+                    position: "fixed",
+                    left: horizontalGutter,
+                    bottom: footerHeight + (isPhone ? 14 : 18),
+                    width: `calc(50vw - ${horizontalGutter}px)`,
+                    boxSizing: "border-box",
+                    zIndex: 5,
+                    userSelect: "none",
+                }}
+            >
                 <div
                     style={{
-                        width: "min(480px, 100% - 32px)",
-                        boxSizing: "border-box",
-                        paddingLeft: horizontalGutter,
-                        marginTop: isPhone ? 28 : 36,
-                        paddingBottom: isPhone ? 70 : 76,
-                        userSelect: "none",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: isPhone ? 12 : 13,
+                        lineHeight: 1.25,
+                        letterSpacing: "0em",
+                        fontWeight: 600,
+                        fontStyle: "normal",
+                        marginBottom: 4,
                     }}
                 >
-                    <div
-                        style={{
-                            fontFamily: FONT_FAMILY,
-                            fontSize: isPhone ? 12 : 13,
-                            lineHeight: 1.25,
-                            letterSpacing: "0em",
-                            fontWeight: 600,
-                            fontStyle: "medium",
-                            marginBottom: 4,
-                        }}
-                    >
-                        {activeItem.title}
-                    </div>
-                    <div
-                        style={{
-                            fontFamily: FONT_FAMILY,
-                            fontSize: isPhone ? 11 : 12,
-                            lineHeight: 1.3,
-                            letterSpacing: "0.01em",
-                            fontWeight: 500,
-                            color: "rgba(0,0,0,0.7)",
-                        }}
-                    >
-                        {activeItem.description}
-                    </div>
+                    {activeItem.title}
                 </div>
-            </section>
+                <div
+                    style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: isPhone ? 11 : 12,
+                        lineHeight: 1.3,
+                        letterSpacing: "0.01em",
+                        fontWeight: 500,
+                        fontStyle: "normal",
+                        color: "rgba(0,0,0,0.7)",
+                    }}
+                >
+                    {activeItem.description}
+                </div>
+            </div>
 
             {/* --- FOOTER A DESTRA --- */}
             <footer
