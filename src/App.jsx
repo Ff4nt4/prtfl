@@ -31,6 +31,14 @@ function NavigationInterceptor() {
 
     useEffect(() => {
         const handleInternalNavigation = (event) => {
+            // Se un link ha gia' gestito da solo il proprio click (es. il
+            // pulsante "DOWNLOAD PORTFOLIO", che chiama preventDefault()
+            // per aprire un popup invece di navigare), non dobbiamo
+            // interferire: altrimenti l'intercettore naviga comunque
+            // verso l'href del link, smontando la pagina e chiudendo
+            // il popup un istante dopo averlo aperto.
+            if (event.defaultPrevented) return
+
             const target = event.target
             const anchor = target.closest("a")
 
