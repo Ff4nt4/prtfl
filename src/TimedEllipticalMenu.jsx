@@ -18,12 +18,12 @@ const MENU_ITEMS = [
     {
         label: "SELECTED WORKS",
         href: "/selected-works",
-        left: "14%",
-        top: "23%",
+        left: "30%",
+        top: "30%",
     },
-    { label: "EXHIBITIONS", href: "/exhibitions", left: "28%", top: "38%" },
+    { label: "EXHIBITIONS", href: "/exhibitions", left: "50%", top: "38%" },
     { label: "CONTACTS", href: "/contact", left: "80%", top: "50%" },
-    { label: "DOWNLOAD PORTFOLIO", href: "/clouds", left: "69%", top: "67%" },
+    { label: "DOWNLOAD PORTFOLIO", href: "/clouds", left: "69%", top: "70%" },
 ]
 
 const VIDEO_SOURCES = {
@@ -324,7 +324,7 @@ export default function TimedEllipticalMenu({
                     style={{
                         position: "absolute",
                         inset: 0,
-                        background: "rgba(0, 0, 0, 0.16)",
+                        background: "rgba(0, 0, 0, 0.6)",
                     }}
                 />
             </div>
@@ -504,9 +504,12 @@ export default function TimedEllipticalMenu({
                         style={{
                             color: "#FFFFFF",
                             textDecoration: "none",
-                            padding: "4px 0",
+                            padding: "3px 0",
                             textAlign: "center",
                             letterSpacing: "0.6px",
+                            textTransform: "uppercase",
+                            fontFamily: "Inter, Helvetica, Arial, sans-serif", // Stesso font del menu
+                            fontSize: "14px", // Leggermente più piccolo del menu principale per gerarchia
                         }}
                     >
                         ITA
@@ -522,6 +525,9 @@ export default function TimedEllipticalMenu({
                             padding: "4px 0",
                             textAlign: "center",
                             letterSpacing: "0.6px",
+                            textTransform: "uppercase",
+                            fontFamily: "Inter, Helvetica, Arial, sans-serif", // Stesso font del menu
+                            fontSize: "14px", // Leggermente più piccolo del menu principale per gerarchia
                         }}
                     >
                         ENG
