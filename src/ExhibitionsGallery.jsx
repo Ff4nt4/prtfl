@@ -10,59 +10,59 @@ import {
 // --- DATI DELLE MOSTRINE ---
 const EXHIBITIONS = [
     {
-        image: "https://framerusercontent.com/images/fmFTgvoz3alGQypONavsu2dXjGA.jpg?width=12600&height=8400&kb=1931",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/1.jpg",
         title: "Culvert (2026).",
         description:
             "SOLO EXHIBITION CURATED BY SIMONE S. MELIS AT RISS(E) - VARESE (IT)",
     },
     {
-        image: "https://framerusercontent.com/images/NO0MtY1LyK7BllA9EdkEfiifLRs.jpg?width=3717&height=2478&kb=543",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/2.jpg",
         title: "Collyrium (2026)",
         description:
             "SOLO EXHIBITION AT BACHECA - FLORENCE (IT). COURTESY OF THE GALLERY - PH. LENA SHAPOSHNIKOVA",
     },
     {
-        image: "https://framerusercontent.com/images/HPOgyr4VOajySmqJKRArd770k.jpg?width=3840&height=2561&kb=219",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/3.jpg",
         title: "Ventaglio (2025)",
         description:
             "GROUP EXHIBITION CURATED BY VALERIO NICOLAI AT CLIMA GALLERY - MILANO (IT). COURTESY OF THE GALLERY - PH. FLAVIO PESCATORI",
     },
     {
-        image: "https://framerusercontent.com/images/5XMKWdtLQP4zq88qkaxceuDC424.jpg?width=6000&height=4000&kb=872",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/4.jpg",
         title: "Mostrina (2025)",
         description:
             "GROUP EXHIBITION CURATED BY MARCO AUGUSTO BASSO AND MARTINA MONTAGNA AT PALAZZO BRONZO - GENOA (IT). COURTESY OF PALAZZO BRONZO",
     },
     {
-        image: "https://framerusercontent.com/images/F98dRZ9DasMm4Vyjtq0EWlGwfk.jpg?width=4252&height=2835&kb=1566",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/5.jpg",
         title: "Incandescenze e maree (2025)",
         description:
             "GROUP EXHIBITION CURATED BY MARTINA CIOFFI AT YAG GARAGE - PESCARA (IT). COURTESY OF THE GALLERY - PH. PIERLUIGI FABRIZIO",
     },
     {
-        image: "https://framerusercontent.com/images/1jpNlDg0rsbXULNJgiqDdZ1DQ.jpg?width=1280&height=853&kb=28",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/6.jpg",
         title: "Talents! (2025)",
         description: "OPEN STUDIO AT FONDATION FIMINCO - PARIS (FR).",
     },
     {
-        image: "https://framerusercontent.com/images/m9b4tIjd7LsVJRSLReU6L2ZpHs.jpg?width=1536&height=1024&kb=752",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/7.jpg",
         title: "Parco d’arte ambientale di Torre Mammona (2023–25)",
         description: "OPERA SITE SPECIFIC - ASSISI (IT)",
     },
     {
-        image: "https://framerusercontent.com/images/e1p45EUYTG5JkDRte6q73GD3hw.jpg?width=3740&height=2805&kb=442",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/8.jpg",
         title: "Black’n’yellow Black’n’yellow (2023)",
         description:
             "SOLO EXHIBITION CURATED BY CECILIA MENTASTI AT ANONIMAKUNSTHALLE - VARESE (it)",
     },
     {
-        image: "https://framerusercontent.com/images/S8I2BRZBZ7nlUIoTOqfL53VFP2c.jpg?width=4140&height=2760&kb=408",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/9.jpg",
         title: "I re non toccano le porte (2024)",
         description:
             "GROUP EXHIBITION CURATED BY ERMANNO CRISTINI AND GIANCARLO NORESE AT CASA SCAGLIONI - CASTELPONZONE (IT)",
     },
     {
-        image: "https://framerusercontent.com/images/AKYSXeB1lMbQ05zsGcYpkKeBJs.jpg?width=3508&height=2480&kb=137",
+        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/10.jpg",
         title: "ECAL Talent Days (2023)",
         description:
             "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - Renens, Lausanne (CH)",
