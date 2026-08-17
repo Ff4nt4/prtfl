@@ -7,62 +7,77 @@ import {
     startTransition,
 } from "react"
 
+// Import locale delle immagini: Vite le impacchetta e genera l'URL
+// corretto (con il path base "/prtfl/" incluso) al build. I link
+// diretti a "github.com/.../blob/..." NON funzionano come <img src>
+// perche' quella e' una pagina HTML di GitHub, non il file immagine.
+import img1 from "./assets/imagesexhibitions/1.jpg"
+import img2 from "./assets/imagesexhibitions/2.jpg"
+import img3 from "./assets/imagesexhibitions/3.jpg"
+import img4 from "./assets/imagesexhibitions/4.jpg"
+import img5 from "./assets/imagesexhibitions/5.jpg"
+import img6 from "./assets/imagesexhibitions/6.jpg"
+import img7 from "./assets/imagesexhibitions/7.jpg"
+import img8 from "./assets/imagesexhibitions/8.jpg"
+import img9 from "./assets/imagesexhibitions/9.jpg"
+import img10 from "./assets/imagesexhibitions/10.jpg"
+
 // --- DATI DELLE MOSTRINE ---
 const EXHIBITIONS = [
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/1.jpg",
+        image: img1,
         title: "Culvert (2026).",
         description:
             "SOLO EXHIBITION CURATED BY SIMONE S. MELIS AT RISS(E) - VARESE (IT)",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/2.jpg",
+        image: img2,
         title: "Collyrium (2026)",
         description:
             "SOLO EXHIBITION AT BACHECA - FLORENCE (IT). COURTESY OF THE GALLERY - PH. LENA SHAPOSHNIKOVA",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/3.jpg",
+        image: img3,
         title: "Ventaglio (2025)",
         description:
             "GROUP EXHIBITION CURATED BY VALERIO NICOLAI AT CLIMA GALLERY - MILANO (IT). COURTESY OF THE GALLERY - PH. FLAVIO PESCATORI",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/4.jpg",
+        image: img4,
         title: "Mostrina (2025)",
         description:
             "GROUP EXHIBITION CURATED BY MARCO AUGUSTO BASSO AND MARTINA MONTAGNA AT PALAZZO BRONZO - GENOA (IT). COURTESY OF PALAZZO BRONZO",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/5.jpg",
+        image: img5,
         title: "Incandescenze e maree (2025)",
         description:
             "GROUP EXHIBITION CURATED BY MARTINA CIOFFI AT YAG GARAGE - PESCARA (IT). COURTESY OF THE GALLERY - PH. PIERLUIGI FABRIZIO",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/6.jpg",
+        image: img6,
         title: "Talents! (2025)",
         description: "OPEN STUDIO AT FONDATION FIMINCO - PARIS (FR).",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/7.jpg",
+        image: img7,
         title: "Parco d’arte ambientale di Torre Mammona (2023–25)",
         description: "OPERA SITE SPECIFIC - ASSISI (IT)",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/8.jpg",
+        image: img8,
         title: "Black’n’yellow Black’n’yellow (2023)",
         description:
             "SOLO EXHIBITION CURATED BY CECILIA MENTASTI AT ANONIMAKUNSTHALLE - VARESE (it)",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/9.jpg",
+        image: img9,
         title: "I re non toccano le porte (2024)",
         description:
             "GROUP EXHIBITION CURATED BY ERMANNO CRISTINI AND GIANCARLO NORESE AT CASA SCAGLIONI - CASTELPONZONE (IT)",
     },
     {
-        image: "https://github.com/Ff4nt4/prtfl/blob/main/imagesexhibitions/10.jpg",
+        image: img10,
         title: "ECAL Talent Days (2023)",
         description:
             "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - Renens, Lausanne (CH)",
