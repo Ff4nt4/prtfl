@@ -28,61 +28,61 @@ import img10 from "./assets/imagesexhibitions/10.jpg"
 const EXHIBITIONS = [
     {
         image: img1,
-        title: "Culvert (2026).",
+        title: "Culvert (2026)",
         description:
-            "SOLO EXHIBITION CURATED BY SIMONE S. MELIS AT RISS(E) - VARESE (IT)",
+            "Solo exhibition curated by Simone S. Melis at Riss(e). Varese (IT)",
     },
     {
         image: img2,
         title: "Collyrium (2026)",
         description:
-            "SOLO EXHIBITION AT BACHECA - FLORENCE (IT). COURTESY OF THE GALLERY - PH. LENA SHAPOSHNIKOVA",
+            "Solo exhibition at Bacheca. Florence (IT) - courtesy of the gallery. Ph: Lena Shaposhnikova",
     },
     {
         image: img3,
         title: "Ventaglio (2025)",
         description:
-            "GROUP EXHIBITION CURATED BY VALERIO NICOLAI AT CLIMA GALLERY - MILANO (IT). COURTESY OF THE GALLERY - PH. FLAVIO PESCATORI",
+            "Group exhibition curated by Valerio Nicolai, at Clima Gallery. Milan (IT) - courtesy of the gallery. Ph: Flavio Pescatori",
     },
     {
         image: img4,
         title: "Mostrina (2025)",
         description:
-            "GROUP EXHIBITION CURATED BY MARCO AUGUSTO BASSO AND MARTINA MONTAGNA AT PALAZZO BRONZO - GENOA (IT). COURTESY OF PALAZZO BRONZO",
+            "Group exhibition curated by Marco A. Basso and Martina Montagna at Palazzo Bronzo. Genoa (IT) - courtesy of Palazzo Bronzo",
     },
     {
         image: img5,
         title: "Incandescenze e maree (2025)",
         description:
-            "GROUP EXHIBITION CURATED BY MARTINA CIOFFI AT YAG GARAGE - PESCARA (IT). COURTESY OF THE GALLERY - PH. PIERLUIGI FABRIZIO",
+            "Group exhibition curated by Martina Cioffi, at YAG Garage. Pescara (IT) - courtesy of the gallery. Ph: Pierluigi Fabrizio",
     },
     {
         image: img6,
         title: "Talents! (2025)",
-        description: "OPEN STUDIO AT FONDATION FIMINCO - PARIS (FR).",
+        description: "Open studio at Fondation Fiminco. Paris (FR)",
     },
     {
         image: img7,
         title: "Parco d’arte ambientale di Torre Mammona (2023–25)",
-        description: "OPERA SITE SPECIFIC - ASSISI (IT)",
+        description: "Opera site specific. Assisi (IT)",
     },
     {
         image: img8,
         title: "Black’n’yellow Black’n’yellow (2023)",
         description:
-            "SOLO EXHIBITION CURATED BY CECILIA MENTASTI AT ANONIMAKUNSTHALLE - VARESE (it)",
+            "Solo exhibition curated by Cecilia Mentasti at AnonimaKunsthalle. Varese (IT)",
     },
     {
         image: img9,
         title: "I re non toccano le porte (2024)",
         description:
-            "GROUP EXHIBITION CURATED BY ERMANNO CRISTINI AND GIANCARLO NORESE AT CASA SCAGLIONI - CASTELPONZONE (IT)",
+            "Group exhibition curated by Ermanno Cristini and Giancarlo Norese at Casa Scaglioni. Castelponzone (IT)",
     },
     {
         image: img10,
         title: "ECAL Talent Days (2023)",
         description:
-            "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - Renens, Lausanne (CH)",
+            "Degree show of ÉCAL at ELAC Gallery. Renens, Lausanne (CH)",
     },
 ]
 
