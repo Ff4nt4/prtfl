@@ -11,6 +11,8 @@ import {
 // corretto (con il path base "/prtfl/" incluso) al build. I link
 // diretti a "github.com/.../blob/..." NON funzionano come <img src>
 // perche' quella e' una pagina HTML di GitHub, non il file immagine.
+import PageHeader from "./PageHeader.jsx"
+
 import img1 from "./assets/imagesexhibitions/1.jpg"
 import img2 from "./assets/imagesexhibitions/2.jpg"
 import img3 from "./assets/imagesexhibitions/3.jpg"
@@ -219,42 +221,12 @@ export default function ExhibitionsGallery() {
                 color: COLOR_BLACK,
             }}
         >
-            {/* --- HEADER FISSO --- */}
-            <header
-                style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: headerReserved,
-                    paddingLeft: horizontalGutter,
-                    paddingRight: horizontalGutter,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    boxSizing: "border-box",
-                    zIndex: 10,
-                    pointerEvents: "none",
-                }}
-            >
-                <a href="/" style={navLinkStyle}>
-                    CLAUDIA MANGONE
-                </a>
-                
-                <div
-                    style={{
-                        ...navLinkStyle,
-                        position: "absolute",
-                        left: "52%",
-                        transform: "translateX(-50%)",
-                        cursor: "default",
-                    }}
-                >
-                    EXHIBITIONS
-                </div>
-                
-                <div style={{ width: isPhone ? 50 : 100 }} aria-hidden="true" />
-            </header>
+            {/* --- HEADER FISSO ---
+                Ora e' il componente condiviso PageHeader: garantisce che
+                "CLAUDIA MANGONE" resti nello stesso identico punto (stessa
+                altezza dall'alto, stesso font-size) su questa e su tutte le
+                future pagine secondarie (/selected-works, /contact, /clouds). */}
+            <PageHeader centerLabel="EXHIBITIONS" />
 
             {/* --- CONTENUTO PRINCIPALE --- */}
             <section

@@ -9,7 +9,7 @@ function Home() {
     const menuConfig = {
         textColor: "#FFFFFF",
         markerColor: "#FFFFFF",
-        fontSize: 15,
+        fontSize: 16,
         markerWidth: 14,
     }
 
