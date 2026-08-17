@@ -80,7 +80,7 @@ const EXHIBITIONS = [
         image: img10,
         title: "ECAL Talent Days (2023)",
         description:
-            "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - Renens, Lausanne (CH)",
+            "DEGREE SHOW OF ÉCAL AT ELAC GALLERY - RENENS, LAUSANNE (CH)",
     },
 ]
 
@@ -324,7 +324,7 @@ export default function ExhibitionsGallery() {
                                     alt={item.title}
                                     draggable={false}
                                     style={{
-                                        height: "100%",
+                                        height: "150%",
                                         width: "auto",
                                         // Limite di larghezza solo per le
                                         // foto molto panoramiche: objectFit
@@ -361,7 +361,7 @@ export default function ExhibitionsGallery() {
                             lineHeight: 1.25,
                             letterSpacing: "0em",
                             fontWeight: 600,
-                            fontStyle: "italic",
+                            fontStyle: "medium",
                             marginBottom: 4,
                         }}
                     >
