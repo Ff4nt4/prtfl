@@ -188,11 +188,12 @@ export default function TimedEllipticalMenu({
         }
     }, [])
 
-    // Hover: cambia solo il colore dell'etichetta (nessuna rotazione qui).
+    // Hover: cambia il colore E fa ruotare l'etichetta sul proprio asse.
     const handleLabelHoverEnter = useCallback(() => {
         if (!canHover) return
         startTransition(() => {
             setIsLabelHovered(true)
+            setTwistCount((prev) => prev + 1)
         })
     }, [canHover])
 
