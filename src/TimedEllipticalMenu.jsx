@@ -14,6 +14,14 @@ import { motion, useInView } from "framer-motion"
 //   - i commenti @framerSupportedLayoutWidth/@framerSupportedLayoutHeight
 // framer-motion invece è una libreria npm normale e funziona identica.
 
+// Video caricati direttamente nel repo (non più da framerusercontent.com):
+// Vite li impacchetta come asset statici col path base corretto incluso,
+// esattamente come fa per le immagini della gallery. Metti i tuoi file
+// video con questi stessi nomi in src/assets/videos/ (vedi note in fondo
+// al file per le dimensioni consigliate e i limiti di GitHub).
+import selectedWorksVideo from "./assets/videos/selected-works.mp4"
+import exhibitionsVideo from "./assets/videos/exhibitions.mp4"
+
 const MENU_ITEMS = [
     {
         label: "SELECTED WORKS",
@@ -27,10 +35,8 @@ const MENU_ITEMS = [
 ]
 
 const VIDEO_SOURCES = {
-    "SELECTED WORKS":
-        "https://framerusercontent.com/assets/U3lN1Aha1LJoNM8GWXU6l8GuII.mp4",
-    EXHIBITIONS:
-        "https://framerusercontent.com/assets/sSDj1pOjOUa1QuyLS9F8CFPzNI.mp4",
+    "SELECTED WORKS": selectedWorksVideo,
+    EXHIBITIONS: exhibitionsVideo,
 }
 
 const VIDEO_PLAYLIST = [
@@ -393,48 +399,16 @@ export default function TimedEllipticalMenu({
                     fontWeight: 500,
                     textAlign:
                         isPhone && isDownloadPortfolio ? "center" : "left",
+                    // Necessario perche' il rotateX del blocco marker+testo
+                    // (vedi sotto) risulti un vero giro 3D e non un
+                    // semplice schiacciamento verticale piatto.
+                    perspective: 700,
                 }}
                 aria-label={`Open ${activeItem.label}`}
             >
-                <motion.span
-                    initial={false}
-                    animate={{
-                        color:
-                            isLabelHovered && canHover
-                                ? "#A6FF00"
-                                : markerColor,
-                        boxShadow:
-                            isLabelHovered && canHover
-                                ? "0 0 8px rgba(166, 255, 0, 0.55)"
-                                : "0 0 0 rgba(0, 0, 0, 0)",
-                    }}
-                    transition={{ duration: 1.15, ease: "easeInOut" }}
-                    style={{ display: "inline-flex", flexShrink: 0 }}
-                >
-                    <motion.span
-                        key={`${activeIndex}-${markerWidth}`}
-                        aria-hidden="true"
-                        initial={{ width: markerWidth }}
-                        animate={{
-                            width: [
-                                markerWidth,
-                                expandedMarkerWidth,
-                                markerWidth,
-                            ],
-                        }}
-                        transition={{
-                            duration: 0.42,
-                            ease: "easeInOut",
-                            times: [0, 0.45, 1],
-                        }}
-                        style={{
-                            display: "inline-block",
-                            height: 4,
-                            background: "currentColor",
-                            flexShrink: 0,
-                        }}
-                    />
-                </motion.span>
+                {/* Marker (rettangolo) + testo ora ruotano INSIEME, come
+                    un unico blocco, attorno all'asse orizzontale che
+                    taglia le lettere a metà (rotateX). */}
                 <motion.span
                     key={`${twistCount}`}
                     initial={false}
@@ -445,9 +419,49 @@ export default function TimedEllipticalMenu({
                     style={{
                         display: "inline-flex",
                         alignItems: "center",
+                        gap: 10,
                         transformStyle: "preserve-3d",
                     }}
                 >
+                    <motion.span
+                        initial={false}
+                        animate={{
+                            color:
+                                isLabelHovered && canHover
+                                    ? "#A6FF00"
+                                    : markerColor,
+                            boxShadow:
+                                isLabelHovered && canHover
+                                    ? "0 0 8px rgba(166, 255, 0, 0.55)"
+                                    : "0 0 0 rgba(0, 0, 0, 0)",
+                        }}
+                        transition={{ duration: 1.15, ease: "easeInOut" }}
+                        style={{ display: "inline-flex", flexShrink: 0 }}
+                    >
+                        <motion.span
+                            key={`${activeIndex}-${markerWidth}`}
+                            aria-hidden="true"
+                            initial={{ width: markerWidth }}
+                            animate={{
+                                width: [
+                                    markerWidth,
+                                    expandedMarkerWidth,
+                                    markerWidth,
+                                ],
+                            }}
+                            transition={{
+                                duration: 0.42,
+                                ease: "easeInOut",
+                                times: [0, 0.45, 1],
+                            }}
+                            style={{
+                                display: "inline-block",
+                                height: 4,
+                                background: "currentColor",
+                                flexShrink: 0,
+                            }}
+                        />
+                    </motion.span>
                     <motion.span
                         initial={false}
                         animate={{
@@ -537,3 +551,20 @@ export default function TimedEllipticalMenu({
         </div>
     )
 }
+
+/*
+ * NOTE SUI VIDEO LOCALI (src/assets/videos/)
+ * -------------------------------------------
+ * - GitHub blocca il push di singoli file oltre i 100MB, e avvisa già
+ *   sopra i 50MB. Se i tuoi export sono più pesanti, comprimili prima
+ *   (es. con HandBrake, oppure via ffmpeg:
+ *   `ffmpeg -i input.mov -vcodec libx264 -crf 28 -preset slow -an output.mp4`)
+ *   oppure usa Git LFS per la repo.
+ * - Per il web, un mp4 H.264 (yuv420p) senza audio, larghezza max
+ *   1920px e bitrate contenuto, è il formato più compatibile e leggero
+ *   per un video di sfondo in autoplay/muted come questo.
+ * - I nomi dei file devono corrispondere esattamente a quelli importati
+ *   qui sopra (selected-works.mp4, exhibitions.mp4). Per aggiungere un
+ *   terzo video, aggiungi un nuovo import e una nuova voce in
+ *   VIDEO_SOURCES/VIDEO_PLAYLIST.
+ */
