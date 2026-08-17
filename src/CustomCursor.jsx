@@ -113,7 +113,7 @@ export default function CustomCursor() {
                 left: cursorX,
                 top: cursorY,
                 transform: "translate(-50%, -50%)",
-                zIndex: 9999,
+                zIndex: 999999,
                 pointerEvents: "none",
                 // Sempre bianco + "difference": il colore risultante si inverte
                 // rispetto a ciò che c'è sotto, quindi resta sempre leggibile
