@@ -7,6 +7,11 @@ import {
     startTransition,
 } from "react"
 
+// Convertito da Framer Code Component a componente React standalone.
+// Rimossi: import { addPropertyControls } from "framer", la addPropertyControls(...)
+// finale, l'interface MyComponentProps (vuota, non serve più) e i commenti
+// @framerSupportedLayoutWidth/Height (validi solo dentro Framer).
+
 const EXHIBITIONS = [
     {
         image: "https://framerusercontent.com/images/fmFTgvoz3alGQypONavsu2dXjGA.jpg?width=12600&height=8400&kb=1931",

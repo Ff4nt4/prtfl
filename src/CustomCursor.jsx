@@ -38,6 +38,9 @@ export default function CustomCursor() {
         return () => mediaQuery.removeEventListener("change", update)
     }, [])
 
+    // Nasconde il cursore nativo OVUNQUE nella pagina (con !important, così
+    // nessuno stile locale come "cursor: grab" nella galleria può farlo
+    // ricomparire) finché il cursore custom è attivo.
     useEffect(() => {
         if (typeof document === "undefined" || !canHover) return
 
@@ -112,6 +115,10 @@ export default function CustomCursor() {
                 transform: "translate(-50%, -50%)",
                 zIndex: 9999,
                 pointerEvents: "none",
+                // Sempre bianco + "difference": il colore risultante si inverte
+                // rispetto a ciò che c'è sotto, quindi resta sempre leggibile
+                // sia su sfondi scuri (video, home) sia chiari (pagina bianca
+                // di /exhibitions) senza bisogno di sapere che pagina è.
                 color: "#FFFFFF",
                 mixBlendMode: "difference",
                 fontSize: 17.6,

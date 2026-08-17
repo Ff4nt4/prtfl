@@ -38,6 +38,16 @@ const VIDEO_PLAYLIST = [
     VIDEO_SOURCES.EXHIBITIONS,
 ]
 
+/**
+ * Menu ellittico animato a rotazione temporizzata.
+ *
+ * Props (equivalenti ai vecchi Property Controls di Framer):
+ * @param {number}  durationSeconds - non usato direttamente (il timer è fisso a 3s, vedi nota sotto)
+ * @param {string}  textColor
+ * @param {string}  markerColor
+ * @param {number}  fontSize
+ * @param {number}  markerWidth
+ */
 export default function TimedEllipticalMenu({
     durationSeconds = 3,
     textColor = "#FFFFFF",
@@ -60,6 +70,8 @@ export default function TimedEllipticalMenu({
     const activeLinkRef = useRef(null)
     const popupRef = useRef(null)
     const videoRef = useRef(null)
+    // Fuori da Framer non esiste un "renderer statico" (preview/canvas):
+    // siamo sempre lato browser, quindi isStatic è sempre false.
     const isStatic = false
     const isInView = useInView(containerRef, { amount: 0.2 })
     void durationSeconds
@@ -137,7 +149,9 @@ export default function TimedEllipticalMenu({
 
         const playPromise = videoRef.current.play()
         if (playPromise && typeof playPromise.catch === "function") {
-            playPromise.catch(() => {})
+            playPromise.catch(() => {
+                // Ignora silenziosamente gli errori di autoplay bloccato dal browser.
+            })
         }
     }, [activeVideoSrc, isInView])
 
@@ -174,6 +188,7 @@ export default function TimedEllipticalMenu({
         }
     }, [])
 
+    // Hover: cambia solo il colore dell'etichetta (nessuna rotazione qui).
     const handleLabelHoverEnter = useCallback(() => {
         if (!canHover) return
         startTransition(() => {
@@ -188,6 +203,8 @@ export default function TimedEllipticalMenu({
         })
     }, [canHover])
 
+    // Click: fa ruotare l'etichetta sul proprio asse (funziona anche su touch,
+    // per questo non è vincolato a canHover).
     const handleLabelClick = useCallback(() => {
         startTransition(() => {
             setTwistCount((prev) => prev + 1)
@@ -310,6 +327,8 @@ export default function TimedEllipticalMenu({
                     }}
                 />
             </div>
+            {/* Intestazione statica: stesso font/stile del menu, sempre bianca,
+                non è un link, non cambia colore e non si muove mai. */}
             <div
                 style={{
                     position: "absolute",
@@ -328,7 +347,7 @@ export default function TimedEllipticalMenu({
             >
                 CLAUDIA MANGONE
             </div>
-            
+            <a
                 ref={activeLinkRef}
                 href={activeItem.href}
                 onMouseEnter={handleLabelHoverEnter}
@@ -476,7 +495,7 @@ export default function TimedEllipticalMenu({
                         zIndex: 10002,
                     }}
                 >
-                    
+                    <a
                         role="menuitem"
                         href="https://drive.usercontent.google.com/download?id=10e9MGVYh1pgnaj0mjs7Q5-hp6FFlmVdv&export=download&confirm=t"
                         download
@@ -491,7 +510,7 @@ export default function TimedEllipticalMenu({
                     >
                         ITA
                     </a>
-                    
+                    <a
                         role="menuitem"
                         href="https://drive.usercontent.google.com/download?id=1XrckMoMlpYXX7EW0XZ2UgCJ02kaqR1Nh&export=download&confirm=t"
                         download
