@@ -103,7 +103,9 @@ export default function ExhibitionsGallery() {
     const gap = isPhone ? 12 : 28
     const horizontalGutter = isPhone ? 16 : 48
     const headerReserved = isPhone ? 72 : 100
-    const galleryHeight = isPhone ? "60vh" : "55vh"
+    // Dimensione ridotta rispetto a prima: le foto sono piu' piccole ma
+    // tutte alla STESSA altezza (uniformita'), senza essere tagliate.
+    const galleryHeight = isPhone ? "36vh" : "34vh"
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -260,9 +262,13 @@ export default function ExhibitionsGallery() {
                     inset: 0,
                     display: "flex",
                     flexDirection: "column",
+                    // "center" verticalmente sull'insieme galleria+didascalia,
+                    // non solo sulla galleria: cosi' la didascalia resta
+                    // sempre visibile sotto le foto, mai sovrapposta.
                     justifyContent: "center",
                     paddingTop: headerReserved,
                     boxSizing: "border-box",
+                    overflowY: "auto",
                     zIndex: 1,
                 }}
             >
@@ -305,9 +311,11 @@ export default function ExhibitionsGallery() {
                                 }}
                                 style={{
                                     height: galleryHeight,
-                                    width: isPhone ? "75vw" : "58vw",
-                                    maxWidth: isPhone ? 580 : 1100,
-                                    minWidth: isPhone ? 280 : 500,
+                                    // Niente larghezza fissa: la larghezza
+                                    // segue quella naturale della foto,
+                                    // cosi' le proporzioni originali sono
+                                    // sempre rispettate (mai tagliate).
+                                    width: "auto",
                                     flex: "0 0 auto",
                                 }}
                             >
@@ -316,9 +324,15 @@ export default function ExhibitionsGallery() {
                                     alt={item.title}
                                     draggable={false}
                                     style={{
-                                        width: "100%",
                                         height: "100%",
-                                        objectFit: "cover",
+                                        width: "auto",
+                                        // Limite di larghezza solo per le
+                                        // foto molto panoramiche: objectFit
+                                        // "contain" garantisce che l'intera
+                                        // immagine resti visibile, senza
+                                        // ritagli, anche quando scatta.
+                                        maxWidth: isPhone ? "72vw" : "42vw",
+                                        objectFit: "contain",
                                         userSelect: "none",
                                         display: "block",
                                     }}
@@ -328,15 +342,15 @@ export default function ExhibitionsGallery() {
                     </div>
                 </div>
 
-                {/* --- CASELLA DIDASCALIE FISSA --- */}
+                {/* --- DIDASCALIE (nel flusso, sotto la galleria: mai in
+                    sovrapposizione con le foto) --- */}
                 <div
                     style={{
-                        position: "absolute",
-                        bottom: isPhone ? 60 : 66,
-                        left: horizontalGutter,
                         width: "min(480px, 100% - 32px)",
                         boxSizing: "border-box",
-                        zIndex: 2,
+                        paddingLeft: horizontalGutter,
+                        marginTop: isPhone ? 28 : 36,
+                        paddingBottom: isPhone ? 70 : 76,
                         userSelect: "none",
                     }}
                 >
@@ -344,11 +358,11 @@ export default function ExhibitionsGallery() {
                         style={{
                             fontFamily: FONT_FAMILY,
                             fontSize: isPhone ? 12 : 13,
-                            lineHeight: 1.45,
+                            lineHeight: 1.25,
                             letterSpacing: "0em",
-                            fontWeight: 500,
+                            fontWeight: 600,
+                            fontStyle: "italic",
                             marginBottom: 4,
-                            textTransform: "uppercase",
                         }}
                     >
                         {activeItem.title}
@@ -357,9 +371,9 @@ export default function ExhibitionsGallery() {
                         style={{
                             fontFamily: FONT_FAMILY,
                             fontSize: isPhone ? 11 : 12,
-                            lineHeight: 1.55,
+                            lineHeight: 1.3,
                             letterSpacing: "0.01em",
-                            fontWeight: 400,
+                            fontWeight: 500,
                             color: "rgba(0,0,0,0.7)",
                         }}
                     >
