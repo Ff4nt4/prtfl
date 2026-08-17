@@ -342,19 +342,25 @@ export default function TimedEllipticalMenu({
                 />
             </div>
             {/* Intestazione statica: stesso font/stile del menu, sempre bianca,
-                non è un link, non cambia colore e non si muove mai. */}
+                non è un link, non cambia colore e non si muove mai.
+                Posizione e dimensione ora IDENTICHE a quelle di
+                PageHeader.jsx (usato in /exhibitions e nelle altre pagine
+                secondarie): top 10/12, left 20/56, font-size 18 fissi -
+                non piu' derivate dal gutter/font responsive del menu,
+                cosi' "CLAUDIA MANGONE" resta nello stesso identico punto
+                su ogni pagina del sito. */}
             <div
                 style={{
                     position: "absolute",
                     zIndex: 2,
-                    top: isPhone ? 20 : 28,
-                    left: isPhone ? 16 : horizontalGutter,
+                    top: isPhone ? 10 : 12,
+                    left: isPhone ? 20 : 56,
                     color: "#FFFFFF",
                     textTransform: "uppercase",
                     letterSpacing: "0.7px",
                     fontFamily: "Inter, Helvetica, Arial, sans-serif",
                     fontWeight: 500,
-                    fontSize: computedFontSize,
+                    fontSize: 18,
                     userSelect: "none",
                     pointerEvents: "none",
                 }}

@@ -385,11 +385,9 @@ export default function ExhibitionsGallery() {
                 quante righe occupa la descrizione sotto.
                 Allineate lateralmente sull'asse verticale centrale (50vw),
                 lo stesso su cui si dispone la foto attiva/centrata.
-                Testo tornato al casing originale (maiuscole/minuscole
-                come scritte in EXHIBITIONS, niente piu' lowercase forzato),
-                sans-serif Helvetica, peso medium, 12px, interlinea piu'
-                stretta, e un piccolo margine in piu' rispetto alle foto
-                (captionsExtraGap) qui sopra. --- */}
+                Nessuna gerarchia tra titolo e descrizione: stessa
+                dimensione, stesso peso (medium), stesso grigio, stessa
+                interlinea ridotta - un unico blocco di testo uniforme. --- */}
             <div
                 style={{
                     position: "fixed",
@@ -399,34 +397,17 @@ export default function ExhibitionsGallery() {
                     boxSizing: "border-box",
                     zIndex: 5,
                     userSelect: "none",
+                    fontFamily: "Helvetica, Arial, sans-serif",
+                    fontSize: 12,
+                    lineHeight: 1.05,
+                    letterSpacing: "0.01em",
+                    fontWeight: 500,
+                    fontStyle: "normal",
+                    color: "rgba(0,0,0,0.7)",
                 }}
             >
-                <div
-                    style={{
-                        fontFamily: "Helvetica, Arial, sans-serif",
-                        fontSize: 12,
-                        lineHeight: 1.1,
-                        letterSpacing: "0em",
-                        fontWeight: 500,
-                        fontStyle: "normal",
-                        marginBottom: 4,
-                    }}
-                >
-                    {activeItem.title}
-                </div>
-                <div
-                    style={{
-                        fontFamily: "Helvetica, Arial, sans-serif",
-                        fontSize: 12,
-                        lineHeight: 1.15,
-                        letterSpacing: "0.01em",
-                        fontWeight: 500,
-                        fontStyle: "normal",
-                        color: "rgba(0,0,0,0.7)",
-                    }}
-                >
-                    {activeItem.description}
-                </div>
+                <div style={{ marginBottom: 2 }}>{activeItem.title}</div>
+                <div>{activeItem.description}</div>
             </div>
 
             {/* --- FOOTER A DESTRA ---
