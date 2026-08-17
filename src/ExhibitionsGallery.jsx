@@ -94,7 +94,15 @@ const COLOR_WHITE = "#FFFFFF"
 export default function ExhibitionsGallery() {
     const [activeIndex, setActiveIndex] = useState(0)
     const [isPhone, setIsPhone] = useState(false)
+    // Larghezza (in px) della PRIMA foto, misurata a runtime: serve per
+    // spostare il paddingLeft dello scroller in modo che sia il CENTRO
+    // della prima foto (non il suo bordo sinistro) a coincidere con
+    // l'asse verticale che divide in due la pagina (50vw). La larghezza
+    // non e' fissa: dipende dalle proporzioni naturali della foto e
+    // dall'altezza corrente (galleryHeight), quindi va misurata via JS.
+    const [firstImageHalfWidth, setFirstImageHalfWidth] = useState(0)
     const scrollerRef = useRef(null)
+    const firstImageRef = useRef(null)
     const itemRefs = useRef([])
     const dragStateRef = useRef({
         dragging: false,
@@ -108,10 +116,16 @@ export default function ExhibitionsGallery() {
     // aumentata di poco rispetto al resto del layout della galleria.
     const footerEdgeGutter = isPhone ? 20 : 56
     const headerReserved = isPhone ? 72 : 100
-    // Foto ingrandite del 50% rispetto a prima (36vh/34vh -> 54vh/51vh),
-    // sempre alla stessa altezza tra loro.
-    const galleryHeight = isPhone ? "54vh" : "51vh"
-    const footerHeight = isPhone ? 50 : 60
+    // Foto scalate del 40% in piu' rispetto a prima (54vh/51vh -> 75.6vh/71.4vh),
+    // sempre alla stessa altezza tra loro. Stessa scala applicata anche al
+    // limite di larghezza (maxWidth qui sotto sull'<img>) per le foto molto
+    // panoramiche, cosi' la proporzione resta coerente.
+    const galleryHeight = isPhone ? "75.6vh" : "71.4vh"
+    // Spazio riservato in basso a didascalie + footer: serve per calcolare
+    // la fascia verticale in cui vive la galleria (vedi "section" piu'
+    // sotto), cosi' le foto si dispongono piu' in alto, centrate esattamente
+    // a meta' tra il fondo dell'intestazione e l'inizio di questa fascia.
+    const bottomReservedHeight = isPhone ? 90 : 110
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -124,6 +138,24 @@ export default function ExhibitionsGallery() {
         window.addEventListener("resize", onResize)
         return () => window.removeEventListener("resize", onResize)
     }, [])
+
+    const measureFirstImage = useCallback(() => {
+        if (!firstImageRef.current) return
+        const width = firstImageRef.current.getBoundingClientRect().width
+        startTransition(() => {
+            setFirstImageHalfWidth(width / 2)
+        })
+    }, [])
+
+    useEffect(() => {
+        measureFirstImage()
+        if (typeof window === "undefined") return
+        window.addEventListener("resize", measureFirstImage)
+        return () => window.removeEventListener("resize", measureFirstImage)
+        // Rimisura anche quando cambia l'altezza della galleria (es. da
+        // desktop a mobile), perche' a parita' di proporzioni la larghezza
+        // renderizzata cambia insieme all'altezza.
+    }, [measureFirstImage, galleryHeight])
 
     const updateCenteredItem = useCallback(() => {
         if (typeof window === "undefined") return
@@ -231,17 +263,26 @@ export default function ExhibitionsGallery() {
                 future pagine secondarie (/selected-works, /contact, /clouds). */}
             <PageHeader centerLabel="EXHIBITIONS" />
 
-            {/* --- CONTENUTO PRINCIPALE --- */}
+            {/* --- CONTENUTO PRINCIPALE ---
+                La sezione non copre piu' l'intera altezza della pagina:
+                va dal fondo dell'intestazione fino all'inizio della fascia
+                riservata a didascalie/footer (bottomReservedHeight). Le
+                foto, centrate verticalmente al suo interno, risultano cosi'
+                disposte esattamente sull'asse orizzontale che taglia a
+                meta' lo spazio tra intestazione e didascalie - quindi
+                piu' in alto rispetto a un centraggio sull'intera pagina. */}
             <section
                 style={{
                     position: "absolute",
-                    inset: 0,
+                    top: headerReserved,
+                    left: 0,
+                    right: 0,
+                    height: `calc(100vh - ${headerReserved}px - ${bottomReservedHeight}px)`,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
-                    paddingTop: headerReserved,
                     boxSizing: "border-box",
-                    overflowY: "auto",
+                    overflow: "visible",
                     zIndex: 1,
                 }}
             >
@@ -262,10 +303,14 @@ export default function ExhibitionsGallery() {
                         cursor: dragStateRef.current.dragging
                             ? "grabbing"
                             : "grab",
-                        // A riposo (scrollLeft 0) la prima foto parte
-                        // esattamente dal centro orizzontale della pagina,
-                        // non dal margine sinistro.
-                        paddingLeft: "50vw",
+                        // A riposo (scrollLeft 0), non e' piu' il BORDO
+                        // sinistro della prima foto a partire dal centro
+                        // della pagina: e' il suo ASSE VERTICALE (centro)
+                        // a coincidere esattamente con l'asse che divide
+                        // la pagina in due (50vw). Per questo il padding
+                        // sottrae meta' della larghezza reale della prima
+                        // foto, misurata via JS in measureFirstImage().
+                        paddingLeft: `calc(50vw - ${firstImageHalfWidth}px)`,
                         paddingRight: horizontalGutter,
                         boxSizing: "border-box",
                     }}
@@ -296,6 +341,12 @@ export default function ExhibitionsGallery() {
                                 }}
                             >
                                 <img
+                                    ref={index === 0 ? firstImageRef : null}
+                                    onLoad={
+                                        index === 0
+                                            ? measureFirstImage
+                                            : undefined
+                                    }
                                     src={item.image}
                                     alt={item.title}
                                     draggable={false}
@@ -307,7 +358,11 @@ export default function ExhibitionsGallery() {
                                         // "contain" garantisce che l'intera
                                         // immagine resti visibile, senza
                                         // ritagli, anche quando scatta.
-                                        maxWidth: isPhone ? "72vw" : "42vw",
+                                        // Scalato anch'esso del 40% insieme
+                                        // all'altezza (42vw/72vw -> 58.8vw/100.8vw).
+                                        maxWidth: isPhone
+                                            ? "100.8vw"
+                                            : "58.8vw",
                                         objectFit: "contain",
                                         userSelect: "none",
                                         display: "block",
@@ -319,14 +374,20 @@ export default function ExhibitionsGallery() {
                 </div>
             </section>
 
-            {/* --- DIDASCALIE: fisse appena sopra il footer, cosi' la
-                galleria sopra ha tutto lo spazio verticale disponibile.
-                Piu' larghe di prima: vanno a capo solo a meta' pagina. --- */}
+            {/* --- DIDASCALIE ---
+                Ancorate dall'ALTO (non piu' dal basso): il blocco parte
+                sempre alla stessa altezza fissa, quindi i titoli restano
+                tutti allineati alla stessa quota indipendentemente da
+                quante righe occupa la descrizione sotto.
+                Allineate lateralmente sull'asse verticale centrale (50vw),
+                lo stesso su cui si dispone la foto attiva/centrata.
+                Stampatello minuscolo (non piu' maiuscolo), sans-serif
+                Helvetica, peso medium, 9px. --- */}
             <div
                 style={{
                     position: "fixed",
-                    left: horizontalGutter,
-                    bottom: footerHeight + (isPhone ? 14 : 18),
+                    left: "50vw",
+                    top: `calc(100vh - ${bottomReservedHeight}px)`,
                     width: `calc(50vw - ${horizontalGutter}px)`,
                     boxSizing: "border-box",
                     zIndex: 5,
@@ -335,12 +396,13 @@ export default function ExhibitionsGallery() {
             >
                 <div
                     style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: isPhone ? 12 : 13,
+                        fontFamily: "Helvetica, Arial, sans-serif",
+                        fontSize: 9,
                         lineHeight: 1.25,
                         letterSpacing: "0em",
-                        fontWeight: 600,
+                        fontWeight: 500,
                         fontStyle: "normal",
+                        textTransform: "lowercase",
                         marginBottom: 4,
                     }}
                 >
@@ -348,12 +410,13 @@ export default function ExhibitionsGallery() {
                 </div>
                 <div
                     style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: isPhone ? 11 : 12,
+                        fontFamily: "Helvetica, Arial, sans-serif",
+                        fontSize: 9,
                         lineHeight: 1.3,
                         letterSpacing: "0.01em",
                         fontWeight: 500,
                         fontStyle: "normal",
+                        textTransform: "lowercase",
                         color: "rgba(0,0,0,0.7)",
                     }}
                 >
