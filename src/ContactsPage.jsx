@@ -51,35 +51,30 @@ Education
 2021 - 2023 Master in Visual Art, ÉCAL, Lausanne
 2016 - 2021 Bachelor  in Visual Art,  Accademia di Belle Arti di Brera, Milan
 
-Solo Exhibitions
+SOLO EXHIBITIONS
 2026 Culvert, riss(e), Varese
 2026 Collyrium, Bacheca, Firenze
 2023 Black’n’yellow Black’n’yellow, AnonimaKunsthalle, Varese
 
-Selected Group Exhibitions
-
+SELECTED GROUP EXHIBITIONS
 2026
 - Magnolia, San Carpoforo, Milan
-
 2025
 - Ventaglio, Clima Gallery, Milan
 - Mostrina, Palazzo Bronzo, Genoa
 - Incandescenze e maree, YAG Garage, Pescara
-
 2024
 - I Re non toccano le porte, Casa Scaglioni, Castelponzone
-
 2022
 - Midsummer Night’s Dream, Notgalerie Skulpturenallee Seestadt, Vienna
-
 2021
 - Pick Clique, Como Contemporanea, Como
 
-Residencies
-2026 ongoing Supertoscana at Centro Pecci and MudaC, Prato, Carrara
+RESIDENCIES
+2026 ongoing Supertoscana at Centro Pecci and MudaC, Prato and Carrara
 2025 Talents! Nuovo Grand Tour at Fondation Fiminco, Paris
 2025 Culture Moves Europe with Fils Sous Filature, Paris
-2024 Sentieri Creativi at Roncobello with GAMeC, Bergamo
+2024 Sentieri Creativi at Comune di Roncobello with GAMeC, Bergamo
 2023 Parco d’arte ambientale di Torre Mammona, Assisi`
 
 export default function ContactsPage() {
