@@ -120,7 +120,10 @@ export default function TimedEllipticalMenu({
         () => Math.max(8, expandedMarkerWidth * 0.5),
         [expandedMarkerWidth]
     )
-    const isPhone = viewportWidth <= 520
+    // Soglia abbassata da 520 a 480, stesso motivo spiegato in
+    // GalleryPage.jsx: un telefono in orizzontale (vedi RotateDeviceGate.jsx)
+    // non deve mai piu' attivare le regole "isPhone" del menu.
+    const isPhone = viewportWidth <= 480
     const horizontalGutter = isPhone ? 16 : edgeInset
     const phoneMaxLabelWidth = useMemo(
         () =>
@@ -147,30 +150,13 @@ export default function TimedEllipticalMenu({
     }, [fontSize, isPhone])
     const activeDurationMs = 3000
 
-    // Se la scritta e' sotto hover, il timer dei 3 secondi viene interrotto
-    // e sostituito da uno da 10 secondi che riparte da quel momento (stessa
-    // logica gia' usata per il pop-up di DOWNLOAD PORTFOLIO, che resta
-    // aperto 10s). Quando il mouse esce, l'effetto si rilancia e riparte
-    // un normale timer da 3s.
-    const hoverExtendedDurationMs = 10000
     useEffect(() => {
         if (!isInView) return
         if (typeof window === "undefined") return
         if (isDownloadPopupOpen) return
-        const delay = isLabelHovered
-            ? hoverExtendedDurationMs
-            : activeDurationMs
-        const timeoutId = window.setTimeout(advance, delay)
+        const timeoutId = window.setTimeout(advance, activeDurationMs)
         return () => window.clearTimeout(timeoutId)
-    }, [
-        activeDurationMs,
-        activeIndex,
-        advance,
-        hoverExtendedDurationMs,
-        isDownloadPopupOpen,
-        isInView,
-        isLabelHovered,
-    ])
+    }, [activeDurationMs, activeIndex, advance, isDownloadPopupOpen, isInView])
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -416,12 +402,6 @@ export default function TimedEllipticalMenu({
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 10,
-                    // Area cliccabile/hover ampliata attorno alla parola:
-                    // essendo l'anchor centrato con translate(-50%, -50%),
-                    // il padding cresce simmetricamente su tutti i lati
-                    // senza spostare la posizione visiva del testo, ma
-                    // rende molto piu' facile centrare il click/hover.
-                    padding: isPhone ? "14px 18px" : "16px 22px",
                     textDecoration: "none",
                     color: textColor,
                     textTransform: "uppercase",

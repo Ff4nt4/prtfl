@@ -1,5 +1,4 @@
 import { useEffect, useState, startTransition } from "react"
-import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- HEADER CONDIVISO PER LE PAGINE SECONDARIE ---
 // Estratto da ExhibitionsGallery.jsx e reso un componente a se' stante
@@ -23,7 +22,10 @@ export default function PageHeader({ centerLabel }) {
         if (typeof window === "undefined") return
         const onResize = () => {
             startTransition(() => {
-                setIsPhone(window.innerWidth <= 768)
+                // Soglia abbassata da 768 a 480, stesso motivo spiegato
+                // in GalleryPage.jsx: un telefono in orizzontale non deve
+                // mai piu' attivare le regole "isPhone".
+                setIsPhone(window.innerWidth <= 480)
             })
         }
         onResize()
@@ -69,9 +71,8 @@ export default function PageHeader({ centerLabel }) {
                 pointerEvents: "none",
             }}
         >
-            <HoverGlowLink
+            <a
                 href="/"
-                baseColor={COLOR_BLACK}
                 style={{
                     ...navLinkStyle,
                     position: "absolute",
@@ -80,12 +81,9 @@ export default function PageHeader({ centerLabel }) {
                 }}
             >
                 CLAUDIA MANGONE
-            </HoverGlowLink>
+            </a>
 
             {centerLabel ? (
-                // Solo testo statico: nell'header l'effetto hover/rotazione
-                // deve restare esclusivo di "CLAUDIA MANGONE". L'etichetta
-                // centrale (es. "CONTACT") qui non è un link cliccabile.
                 <div
                     style={{
                         ...navLinkStyle,
@@ -93,7 +91,7 @@ export default function PageHeader({ centerLabel }) {
                         left: "52%",
                         top: headerTopOffset,
                         transform: "translateX(-50%)",
-                        pointerEvents: "none",
+                        cursor: "default",
                     }}
                 >
                     {centerLabel}

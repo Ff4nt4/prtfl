@@ -1,6 +1,5 @@
 import { useEffect, useState, startTransition } from "react"
 import PageHeader from "./PageHeader.jsx"
-import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- PAGINA CONTATTI ---
 // A differenza di /exhibitions e /selected-works, questa e' una pagina
@@ -87,7 +86,9 @@ export default function ContactsPage() {
         if (typeof window === "undefined") return
         const onResize = () => {
             startTransition(() => {
-                setIsPhone(window.innerWidth <= 768)
+                // Soglia abbassata da 768 a 480, stesso motivo spiegato
+                // in GalleryPage.jsx.
+                setIsPhone(window.innerWidth <= 480)
             })
         }
         onResize()
@@ -140,25 +141,23 @@ export default function ContactsPage() {
                     con lo stesso stile visivo del resto del testo. */}
                 <div style={captionTextStyle}>
                     <div>
-                        <HoverGlowLink
+                        <a
                             href="mailto:claudiamangone4@gmail.com"
-                            baseColor="rgba(0,0,0,0.7)"
                             style={captionLinkStyle}
                         >
                             claudiamangone4@gmail.com
-                        </HoverGlowLink>
+                        </a>
                     </div>
                     <div>
                         IG{" "}
-                        <HoverGlowLink
+                        <a
                             href="https://www.instagram.com/claudia_mangone_/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            baseColor="rgba(0,0,0,0.7)"
                             style={captionLinkStyle}
                         >
                             claudia_mangone_
-                        </HoverGlowLink>
+                        </a>
                     </div>
                 </div>
 

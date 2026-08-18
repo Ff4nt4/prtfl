@@ -8,7 +8,6 @@ import {
 } from "react"
 
 import PageHeader from "./PageHeader.jsx"
-import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- COMPONENTE GENERICO DI GALLERIA A SCORRIMENTO ---
 // Estratto da ExhibitionsGallery.jsx: tutta l'impostazione (header,
@@ -16,6 +15,15 @@ import HoverGlowLink from "./HoverGlowLink.jsx"
 // tagliate, didascalie ancorate dall'alto, footer) e' identica sia per
 // /exhibitions sia per /selected-works. Cambiano solo i CONTENUTI
 // (immagini + didascalie) e l'etichetta al centro dell'header.
+//
+// Uso:
+//   <GalleryPage items={EXHIBITIONS} centerLabel="EXHIBITIONS" />
+//   <GalleryPage items={SELECTED_WORKS} centerLabel="SELECTED WORKS" />
+//
+// Ogni "item" in items[] e':
+//   { image: <url importata>, title: "Titolo (anno)", description: "..." }
+// "description" e' opzionale: se assente o vuota, la didascalia mostra
+// solo il titolo (utile per Selected Works, che ha solo titolo+anno).
 
 const FONT_FAMILY = "Inter, Helvetica, Arial, sans-serif"
 const COLOR_BLACK = "#000000"
@@ -24,6 +32,12 @@ const COLOR_WHITE = "#FFFFFF"
 export default function GalleryPage({ items, centerLabel }) {
     const [activeIndex, setActiveIndex] = useState(0)
     const [isPhone, setIsPhone] = useState(false)
+    // Larghezza (in px) della PRIMA foto, misurata a runtime: serve per
+    // spostare il paddingLeft dello scroller in modo che sia il CENTRO
+    // della prima foto (non il suo bordo sinistro) a coincidere con
+    // l'asse verticale che divide in due la pagina (50vw). La larghezza
+    // non e' fissa: dipende dalle proporzioni naturali della foto e
+    // dall'altezza corrente (galleryHeight), quindi va misurata via JS.
     const [firstImageHalfWidth, setFirstImageHalfWidth] = useState(0)
     const scrollerRef = useRef(null)
     const firstImageRef = useRef(null)
@@ -36,17 +50,36 @@ export default function GalleryPage({ items, centerLabel }) {
 
     const gap = isPhone ? 12 : 28
     const horizontalGutter = isPhone ? 16 : 48
+    // Gutter dedicato al footer (CONTACTS): distanza dal bordo destro
+    // aumentata di poco rispetto al resto del layout della galleria.
     const footerEdgeGutter = isPhone ? 20 : 56
     const headerReserved = isPhone ? 72 : 100
+    // Foto scalate del 40% in piu' rispetto a prima (54vh/51vh -> 75.6vh/71.4vh),
+    // sempre alla stessa altezza tra loro. Stessa scala applicata anche al
+    // limite di larghezza (maxWidth qui sotto sull'<img>) per le foto molto
+    // panoramiche, cosi' la proporzione resta coerente.
     const galleryHeight = isPhone ? "75.6vh" : "71.4vh"
+    // Spazio riservato in basso a didascalie + footer: serve per calcolare
+    // la fascia verticale in cui vive la galleria (vedi "section" piu'
+    // sotto), cosi' le foto si dispongono piu' in alto, centrate esattamente
+    // a meta' tra il fondo dell'intestazione e l'inizio di questa fascia.
     const bottomReservedHeight = isPhone ? 90 : 110
+    // Piccolo margine aggiuntivo SOLO per allontanare un po' le didascalie
+    // dalle foto, senza toccare bottomReservedHeight (che definisce la
+    // fascia della galleria, gia' corretta cosi' com'e').
     const captionsExtraGap = isPhone ? 14 : 18
 
     useEffect(() => {
         if (typeof window === "undefined") return
         const onResize = () => {
             startTransition(() => {
-                setIsPhone(window.innerWidth <= 768)
+                // Soglia abbassata da 768 a 480: un telefono in
+                // orizzontale parte da ~560-600px anche sui modelli piu'
+                // piccoli, quindi non attivera' mai piu' questo ramo -
+                // il sito su smartphone (sempre in orizzontale, vedi
+                // RotateDeviceGate.jsx) usa sempre le stesse regole del
+                // desktop, come richiesto.
+                setIsPhone(window.innerWidth <= 480)
             })
         }
         onResize()
@@ -67,6 +100,10 @@ export default function GalleryPage({ items, centerLabel }) {
         if (typeof window === "undefined") return
         window.addEventListener("resize", measureFirstImage)
         return () => window.removeEventListener("resize", measureFirstImage)
+        // Rimisura anche quando cambia l'altezza della galleria (es. da
+        // desktop a mobile), perche' a parita' di proporzioni la larghezza
+        // renderizzata cambia insieme all'altezza. Anche quando cambia
+        // l'array items (pagina diversa), la prima immagine e' diversa.
     }, [measureFirstImage, galleryHeight, items])
 
     const updateCenteredItem = useCallback(() => {
@@ -168,10 +205,19 @@ export default function GalleryPage({ items, centerLabel }) {
                 color: COLOR_BLACK,
             }}
         >
-            {/* --- HEADER FISSO --- */}
+            {/* --- HEADER FISSO ---
+                Componente condiviso: garantisce che "CLAUDIA MANGONE"
+                resti nello stesso identico punto su ogni pagina secondaria. */}
             <PageHeader centerLabel={centerLabel} />
 
-            {/* --- CONTENUTO PRINCIPALE --- */}
+            {/* --- CONTENUTO PRINCIPALE ---
+                La sezione non copre l'intera altezza della pagina: va dal
+                fondo dell'intestazione fino all'inizio della fascia
+                riservata a didascalie/footer (bottomReservedHeight). Le
+                foto, centrate verticalmente al suo interno, risultano cosi'
+                disposte esattamente sull'asse orizzontale che taglia a
+                meta' lo spazio tra intestazione e didascalie - quindi
+                piu' in alto rispetto a un centraggio sull'intera pagina. */}
             <section
                 style={{
                     position: "absolute",
@@ -204,6 +250,13 @@ export default function GalleryPage({ items, centerLabel }) {
                         cursor: dragStateRef.current.dragging
                             ? "grabbing"
                             : "grab",
+                        // A riposo (scrollLeft 0), non e' il BORDO sinistro
+                        // della prima foto a partire dal centro della
+                        // pagina: e' il suo ASSE VERTICALE (centro) a
+                        // coincidere esattamente con l'asse che divide la
+                        // pagina in due (50vw). Per questo il padding
+                        // sottrae meta' della larghezza reale della prima
+                        // foto, misurata via JS in measureFirstImage().
                         paddingLeft: `calc(50vw - ${firstImageHalfWidth}px)`,
                         paddingRight: horizontalGutter,
                         boxSizing: "border-box",
@@ -226,6 +279,10 @@ export default function GalleryPage({ items, centerLabel }) {
                                 }}
                                 style={{
                                     height: galleryHeight,
+                                    // Niente larghezza fissa: la larghezza
+                                    // segue quella naturale della foto,
+                                    // cosi' le proporzioni originali sono
+                                    // sempre rispettate (mai tagliate).
                                     width: "auto",
                                     flex: "0 0 auto",
                                 }}
@@ -243,6 +300,11 @@ export default function GalleryPage({ items, centerLabel }) {
                                     style={{
                                         height: "100%",
                                         width: "auto",
+                                        // Limite di larghezza solo per le
+                                        // foto molto panoramiche: objectFit
+                                        // "contain" garantisce che l'intera
+                                        // immagine resti visibile, senza
+                                        // ritagli, anche quando scatta.
                                         maxWidth: isPhone
                                             ? "100.8vw"
                                             : "58.8vw",
@@ -257,7 +319,19 @@ export default function GalleryPage({ items, centerLabel }) {
                 </div>
             </section>
 
-            {/* --- DIDASCALIE --- */}
+            {/* --- DIDASCALIE ---
+                Ancorate dall'ALTO (non dal basso): il blocco parte sempre
+                alla stessa altezza fissa, quindi i titoli restano tutti
+                allineati alla stessa quota indipendentemente da quante
+                righe occupa la descrizione sotto (se presente).
+                Allineate lateralmente sull'asse verticale centrale (50vw),
+                lo stesso su cui si dispone la foto attiva/centrata.
+                Nessuna gerarchia tra titolo e descrizione: stessa
+                dimensione, stesso peso (medium), stesso grigio, stessa
+                interlinea ridotta - un unico blocco di testo uniforme.
+                Se "description" non e' presente (es. Selected Works, dove
+                le didascalie sono solo titolo+anno), viene mostrato solo
+                il titolo. --- */}
             <div
                 style={{
                     position: "fixed",
@@ -300,13 +374,9 @@ export default function GalleryPage({ items, centerLabel }) {
                     zIndex: 10,
                 }}
             >
-                <HoverGlowLink
-                    href="/contact"
-                    baseColor={COLOR_BLACK}
-                    style={navLinkStyle}
-                >
+                <a href="/contact" style={navLinkStyle}>
                     CONTACT
-                </HoverGlowLink>
+                </a>
             </footer>
         </main>
     )

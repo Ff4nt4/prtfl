@@ -5,6 +5,7 @@ import ExhibitionsGallery from "./ExhibitionsGallery.jsx"
 import SelectedWorksGallery from "./SelectedWorksGallery.jsx"
 import ContactsPage from "./ContactsPage.jsx"
 import CustomCursor from "./CustomCursor.jsx"
+import RotateDeviceGate from "./RotateDeviceGate.jsx"
 
 // --- COMPONENTE HOME ---
 function Home() {
@@ -68,25 +69,31 @@ function NavigationInterceptor() {
 // --- COMPONENTE PRINCIPALE APP ---
 export default function App() {
     return (
-        // HashRouter e' l'ideale per il deploy statico gratuito (GitHub Pages, Netlify, etc.)
-        <HashRouter>
-            {/* Il Cursore Custom e' fuori dalle <Routes>, quindi resta sempre attivo
-                mentre si naviga tra le pagine */}
-            <CustomCursor />
+        // RotateDeviceGate avvolge TUTTO il sito (fuori dal Router, cosi'
+        // vale su ogni pagina): mostra l'overlay "please rotate your
+        // phone" su telefono/tablet finche' sono in verticale, e tenta il
+        // fullscreen/blocco orizzontale quando il dispositivo e' ruotato.
+        <RotateDeviceGate>
+            {/* HashRouter e' l'ideale per il deploy statico gratuito (GitHub Pages, Netlify, etc.) */}
+            <HashRouter>
+                {/* Il Cursore Custom e' fuori dalle <Routes>, quindi resta sempre attivo
+                    mentre si naviga tra le pagine */}
+                <CustomCursor />
 
-            {/* Anche l'intercettore va fuori dalle <Routes>, cosi' funziona
-                sia sulla Home sia su /exhibitions e le altre pagine future */}
-            <NavigationInterceptor />
+                {/* Anche l'intercettore va fuori dalle <Routes>, cosi' funziona
+                    sia sulla Home sia su /exhibitions e le altre pagine future */}
+                <NavigationInterceptor />
 
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/exhibitions" element={<ExhibitionsGallery />} />
-                <Route path="/selected-works" element={<SelectedWorksGallery />} />
-                <Route path="/contact" element={<ContactsPage />} />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/exhibitions" element={<ExhibitionsGallery />} />
+                    <Route path="/selected-works" element={<SelectedWorksGallery />} />
+                    <Route path="/contact" element={<ContactsPage />} />
 
-                {/* Aggiungi qui /clouds quando converti anche quel
-                    Code Component di Framer */}
-            </Routes>
-        </HashRouter>
+                    {/* Aggiungi qui /clouds quando converti anche quel
+                        Code Component di Framer */}
+                </Routes>
+            </HashRouter>
+        </RotateDeviceGate>
     )
 }
