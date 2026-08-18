@@ -30,7 +30,7 @@ const captionTextStyle = {
     whiteSpace: "pre-line",
 }
 
-// Stesso stile/dimensione della voce centrale dell'header (es. "CONTACTS"):
+// Stesso stile/dimensione della voce centrale dell'header (es. "CONTACT"):
 // usato per l'intestazione "ABOUT" a meta' pagina, come richiesto.
 const sectionHeadingStyle = {
     textTransform: "uppercase",
@@ -41,36 +41,52 @@ const sectionHeadingStyle = {
     color: COLOR_BLACK,
 }
 
-const CONTACT_INFO = `claudiamangone4@gmail.com
-IG claudia_mangone_`
-
 const ABOUT_TEXT = `Claudia Mangone (b.1996)
 Lives and works between Bergamo and Milan
 
-EDUCATION
+Education
 2021 - 2023 Master in Visual Art, ÉCAL, Lausanne
 2016 - 2021 Bachelor  in Visual Art,  Accademia di Belle Arti di Brera, Milan
 
-SOLO EXHIBITIONS
+Solo Exhibitions
 2026 Culvert, riss(e), Varese
 2026 Collyrium, Bacheca, Firenze
 2023 Black’n’yellow Black’n’yellow, AnonimaKunsthalle, Varese
 
-SELECTED GROUP EXHIBITIONS
-2026 Magnolia, San Carpoforo, Milan
-2025 Ventaglio, Clima Gallery, Milan
-2025 Mostrina, Palazzo Bronzo, Genoa
-2025 Incandescenze e maree, YAG Garage, Pescara
-2024 I Re non toccano le porte, Casa Scaglioni, Castelponzone
-2022 Midsummer Night’s Dream, Notgalerie Skulpturenallee Seestadt, Vienna
-2021 Pick Clique, Como Contemporanea, Como
+Selected Group Exhibitions
 
-RESIDENCIES
-2026 ongoing Supertoscana at Centro Pecci and MudaC, Prato and Carrara
+2026
+- Magnolia, San Carpoforo, Milan
+
+2025
+- Ventaglio, Clima Gallery, Milan
+- Mostrina, Palazzo Bronzo, Genoa
+- Incandescenze e maree, YAG Garage, Pescara
+
+2024
+- I Re non toccano le porte, Casa Scaglioni, Castelponzone
+
+2022
+- Midsummer Night’s Dream, Notgalerie Skulpturenallee Seestadt, Vienna
+
+2021
+- Pick Clique, Como Contemporanea, Como
+
+Residencies
+2026 ongoing Supertoscana at Centro Pecci and MudaC, Prato, Carrara
 2025 Talents! Nuovo Grand Tour at Fondation Fiminco, Paris
 2025 Culture Moves Europe with Fils Sous Filature, Paris
-2024 Sentieri Creativi at Comune di Roncobello with GAMeC, Bergamo
+2024 Sentieri Creativi at Roncobello with GAMeC, Bergamo
 2023 Parco d’arte ambientale di Torre Mammona, Assisi`
+
+// Link cliccabili: stesso stile visivo del testo circostante (nessun
+// blu/sottolineato "da browser"), coerente con l'estetica minimale del
+// sito. L'email apre il client di posta, IG apre il profilo in una nuova
+// scheda (e' un dominio esterno).
+const captionLinkStyle = {
+    color: "inherit",
+    textDecoration: "none",
+}
 
 export default function ContactsPage() {
     const [isPhone, setIsPhone] = useState(false)
@@ -110,22 +126,49 @@ export default function ContactsPage() {
                 overflowY: "auto",
             }}
         >
-            <PageHeader centerLabel="CONTACTS" />
+            <PageHeader centerLabel="CONTACT" />
 
+            {/* Blocco di testo spostato dopo meta' pagina, allineato
+                orizzontalmente con "CONTACT" nell'header (che e' centrato
+                al 52%): stessa logica gia' usata per le didascalie in
+                GalleryPage.jsx (left: 50vw). Resta nel flusso normale
+                del documento (non fixed/absolute), quindi scorre insieme
+                al resto della pagina. */}
             <div
                 style={{
                     paddingTop: headerReserved + topGap,
-                    paddingLeft: horizontalGutter,
+                    marginLeft: "50vw",
+                    width: `calc(50vw - ${horizontalGutter}px)`,
                     paddingRight: horizontalGutter,
                     paddingBottom: isPhone ? 60 : 80,
                     boxSizing: "border-box",
-                    maxWidth: 560,
                 }}
             >
-                {/* Contatti: email + Instagram, appena sotto l'header */}
-                <div style={captionTextStyle}>{CONTACT_INFO}</div>
+                {/* Contatti: email e Instagram sono link cliccabili veri,
+                    con lo stesso stile visivo del resto del testo. */}
+                <div style={captionTextStyle}>
+                    <div>
+                        <a
+                            href="mailto:claudiamangone4@gmail.com"
+                            style={captionLinkStyle}
+                        >
+                            claudiamangone4@gmail.com
+                        </a>
+                    </div>
+                    <div>
+                        IG{" "}
+                        <a
+                            href="https://www.instagram.com/claudia_mangone_/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={captionLinkStyle}
+                        >
+                            claudia_mangone_
+                        </a>
+                    </div>
+                </div>
 
-                {/* "ABOUT": stessa dimensione/font di "CONTACTS" nell'header */}
+                {/* "ABOUT": stessa dimensione/font di "CONTACT" nell'header */}
                 <div style={{ ...sectionHeadingStyle, marginTop: blockGap }}>
                     About
                 </div>

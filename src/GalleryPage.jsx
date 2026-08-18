@@ -369,7 +369,7 @@ export default function GalleryPage({ items, centerLabel }) {
                 }}
             >
                 <a href="/contact" style={navLinkStyle}>
-                    CONTACTS
+                    CONTACT
                 </a>
             </footer>
         </main>

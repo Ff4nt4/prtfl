@@ -30,7 +30,7 @@ const MENU_ITEMS = [
         top: "20%",
     },
     { label: "EXHIBITIONS", href: "/exhibitions", left: "45%", top: "38%" },
-    { label: "CONTACTS", href: "/contact", left: "80%", top: "50%" },
+    { label: "CONTACT", href: "/contact", left: "80%", top: "50%" },
     { label: "DOWNLOAD PORTFOLIO", href: "/clouds", left: "63%", top: "70%" },
 ]
 
