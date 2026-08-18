@@ -1,5 +1,6 @@
 import { useEffect, useState, startTransition } from "react"
 import PageHeader from "./PageHeader.jsx"
+import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- PAGINA CONTATTI ---
 // A differenza di /exhibitions e /selected-works, questa e' una pagina
@@ -139,23 +140,25 @@ export default function ContactsPage() {
                     con lo stesso stile visivo del resto del testo. */}
                 <div style={captionTextStyle}>
                     <div>
-                        <a
+                        <HoverGlowLink
                             href="mailto:claudiamangone4@gmail.com"
+                            baseColor="rgba(0,0,0,0.7)"
                             style={captionLinkStyle}
                         >
                             claudiamangone4@gmail.com
-                        </a>
+                        </HoverGlowLink>
                     </div>
                     <div>
                         IG{" "}
-                        <a
+                        <HoverGlowLink
                             href="https://www.instagram.com/claudia_mangone_/"
                             target="_blank"
                             rel="noopener noreferrer"
+                            baseColor="rgba(0,0,0,0.7)"
                             style={captionLinkStyle}
                         >
                             claudia_mangone_
-                        </a>
+                        </HoverGlowLink>
                     </div>
                 </div>
 
