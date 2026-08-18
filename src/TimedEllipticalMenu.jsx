@@ -108,6 +108,10 @@ export default function TimedEllipticalMenu({
         () => activeItem.label === "DOWNLOAD PORTFOLIO",
         [activeItem.label]
     )
+    // Non serve piu' per l'overshoot di larghezza del vecchio rettangolo
+    // (il "boing" e' stato rimosso): resta come margine di sicurezza per
+    // riservare spazio alla "coda" che si allunga dalla punta destra
+    // della stellina, cosi' non viene mai tagliata vicino ai bordi.
     const expandedMarkerWidth = useMemo(
         () => Math.max(markerWidth * 4, markerWidth + 42),
         [markerWidth]
@@ -419,19 +423,19 @@ export default function TimedEllipticalMenu({
                 }}
                 aria-label={`Open ${activeItem.label}`}
             >
-                {/* Marker (rettangolo) + testo ruotano INSIEME al click,
+                {/* Marker (stellina ✦) + testo ruotano INSIEME al click,
                     attorno all'asse orizzontale (rotateX) - questo e'
                     l'effetto "si avvitano su se stesse" al click.
                     IMPORTANTE: niente piu' key={twistCount} qui. Con la key
-                    l'intero blocco (marker compreso) veniva SMONTATO e
-                    RIMONTATO ad ogni click, e questo faceva ripartire anche
-                    l'animazione di allargamento del marker qui sotto - che
-                    invece deve animarsi SOLO quando cambia la voce attiva
-                    (key={`${activeIndex}-${markerWidth}`}), non ad ogni
-                    click. Usando un valore di rotazione cumulativo
-                    (twistCount * 360) invece della key, il blocco resta
-                    montato: il click continua a farlo girare su se stesso,
-                    ma il marker sotto non viene piu' "risvegliato" a torto. */}
+                    l'intero blocco (stellina compresa) verrebbe SMONTATO e
+                    RIMONTATO ad ogni click, facendo ripartire anche
+                    l'animazione di comparsa qui sotto - che invece deve
+                    animarsi SOLO quando cambia la voce attiva (key su
+                    activeIndex), non ad ogni click. Usando un valore di
+                    rotazione cumulativo (twistCount * 360) invece della
+                    key, il blocco resta montato: il click continua a farlo
+                    girare su se stesso, ma stellina/coda/testo sotto non
+                    vengono piu' "risvegliati" a torto. */}
                 <motion.span
                     initial={false}
                     animate={{ rotateX: twistCount * 360 }}
@@ -456,41 +460,88 @@ export default function TimedEllipticalMenu({
                                     : "0 0 0 rgba(0, 0, 0, 0)",
                         }}
                         transition={{ duration: 1.15, ease: "easeInOut" }}
-                        style={{ display: "inline-flex", flexShrink: 0 }}
+                        style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            flexShrink: 0,
+                        }}
                     >
+                        {/* STELLINA: niente piu' "boing" (nessun overshoot di
+                            larghezza). Compare con un pop morbido (scala da 0
+                            a 1) e, finche' resta la voce attiva, pulsa
+                            dolcemente in loop - e' la stellina "pulsante"
+                            richiesta, non piu' un rettangolo che rimbalza. */}
                         <motion.span
-                            key={`${activeIndex}-${markerWidth}`}
+                            key={`star-${activeIndex}`}
                             aria-hidden="true"
-                            initial={{ width: markerWidth }}
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.32, ease: "easeOut" }}
+                            style={{
+                                display: "inline-block",
+                                fontSize: Math.max(14, markerWidth),
+                                lineHeight: 1,
+                                transformOrigin: "center",
+                            }}
+                        >
+                            <motion.span
+                                animate={{ scale: [1, 1.22, 1] }}
+                                transition={{
+                                    duration: 1.3,
+                                    repeat: Infinity,
+                                    ease: "easeInOut",
+                                    delay: 0.32,
+                                }}
+                                style={{ display: "inline-block" }}
+                            >
+                                ✦
+                            </motion.span>
+                        </motion.span>
+                        {/* CODA: e' la "punta di destra" della stellina che si
+                            allunga verso il testo, con un piccolo ritardo
+                            rispetto al pop della stellina - da qui sembra
+                            "uscire" il testo. */}
+                        <motion.span
+                            key={`tail-${activeIndex}`}
+                            aria-hidden="true"
+                            initial={{ width: 0, opacity: 0 }}
                             animate={{
-                                width: [
-                                    markerWidth,
-                                    expandedMarkerWidth,
-                                    markerWidth,
-                                ],
+                                width: Math.max(16, markerWidth * 1.6),
+                                opacity: 1,
                             }}
                             transition={{
-                                duration: 0.42,
-                                ease: "easeInOut",
-                                times: [0, 0.45, 1],
+                                duration: 0.28,
+                                delay: 0.28,
+                                ease: "easeOut",
                             }}
                             style={{
                                 display: "inline-block",
-                                height: 4,
+                                height: 1.5,
                                 background: "currentColor",
                                 flexShrink: 0,
                             }}
                         />
                     </motion.span>
+                    {/* TESTO: compare con un leggero scivolamento da sinistra
+                        (dalla punta della coda) dopo che questa si e' aperta,
+                        cosi' da sembrare "estratto" dalla stellina invece che
+                        apparire di colpo. */}
                     <motion.span
-                        initial={false}
+                        key={`label-${activeIndex}`}
+                        initial={{ opacity: 0, x: -10 }}
                         animate={{
+                            opacity: 1,
+                            x: 0,
                             color:
                                 isLabelHovered && canHover
                                     ? "#A6FF00"
                                     : textColor,
                         }}
-                        transition={{ duration: 1.15, ease: "easeInOut" }}
+                        transition={{
+                            opacity: { duration: 0.3, delay: 0.52, ease: "easeOut" },
+                            x: { duration: 0.3, delay: 0.52, ease: "easeOut" },
+                            color: { duration: 1.15, ease: "easeInOut" },
+                        }}
                         style={{
                             lineHeight: 1.1,
                             textShadow:
