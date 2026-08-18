@@ -423,18 +423,20 @@ export default function TimedEllipticalMenu({
                 }}
                 aria-label={`Open ${activeItem.label}`}
             >
-                {/* Marker (stellina ✦) + testo ruotano INSIEME al click,
-                    attorno all'asse orizzontale (rotateX) - questo e'
-                    l'effetto "si avvitano su se stesse" al click.
+                {/* Marker (stellina ✦) + testo (diviso lettera per lettera)
+                    ruotano INSIEME al click, attorno all'asse orizzontale
+                    (rotateX) - questo e' l'effetto "si avvitano su se
+                    stesse" al click.
                     IMPORTANTE: niente piu' key={twistCount} qui. Con la key
-                    l'intero blocco (stellina compresa) verrebbe SMONTATO e
+                    l'intero blocco (stellina + lettere) verrebbe SMONTATO e
                     RIMONTATO ad ogni click, facendo ripartire anche
                     l'animazione di comparsa qui sotto - che invece deve
                     animarsi SOLO quando cambia la voce attiva (key su
-                    activeIndex), non ad ogni click. Usando un valore di
+                    activeIndex, sia sulla stellina sia sul wrapper delle
+                    lettere), non ad ogni click. Usando un valore di
                     rotazione cumulativo (twistCount * 360) invece della
                     key, il blocco resta montato: il click continua a farlo
-                    girare su se stesso, ma stellina/coda/testo sotto non
+                    girare su se stesso, ma stellina/lettere sotto non
                     vengono piu' "risvegliati" a torto. */}
                 <motion.span
                     initial={false}
@@ -466,17 +468,20 @@ export default function TimedEllipticalMenu({
                             flexShrink: 0,
                         }}
                     >
-                        {/* STELLINA: niente piu' "boing" (nessun overshoot di
-                            larghezza). Compare con un pop morbido (scala da 0
-                            a 1) e, finche' resta la voce attiva, pulsa
-                            dolcemente in loop - e' la stellina "pulsante"
-                            richiesta, non piu' un rettangolo che rimbalza. */}
+                        {/* STELLINA: nessun braccio/coda. Alla comparsa si
+                            INGRANDISCE (overshoot oltre la dimensione finale)
+                            e poi, finche' resta la voce attiva, PULSA in
+                            loop (nessuna rotazione). */}
                         <motion.span
                             key={`star-${activeIndex}`}
                             aria-hidden="true"
                             initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.32, ease: "easeOut" }}
+                            animate={{ scale: [0, 1.65, 1], opacity: 1 }}
+                            transition={{
+                                duration: 0.45,
+                                ease: "easeOut",
+                                times: [0, 0.65, 1],
+                            }}
                             style={{
                                 display: "inline-block",
                                 fontSize: Math.max(14, markerWidth),
@@ -485,64 +490,37 @@ export default function TimedEllipticalMenu({
                             }}
                         >
                             <motion.span
-                                animate={{ scale: [1, 1.22, 1] }}
+                                animate={{ scale: [1, 1.28, 1] }}
                                 transition={{
-                                    duration: 1.3,
+                                    duration: 1.2,
                                     repeat: Infinity,
                                     ease: "easeInOut",
-                                    delay: 0.32,
+                                    delay: 0.45,
                                 }}
                                 style={{ display: "inline-block" }}
                             >
                                 ✦
                             </motion.span>
                         </motion.span>
-                        {/* CODA: e' la "punta di destra" della stellina che si
-                            allunga verso il testo, con un piccolo ritardo
-                            rispetto al pop della stellina - da qui sembra
-                            "uscire" il testo. */}
-                        <motion.span
-                            key={`tail-${activeIndex}`}
-                            aria-hidden="true"
-                            initial={{ width: 0, opacity: 0 }}
-                            animate={{
-                                width: Math.max(16, markerWidth * 1.6),
-                                opacity: 1,
-                            }}
-                            transition={{
-                                duration: 0.28,
-                                delay: 0.28,
-                                ease: "easeOut",
-                            }}
-                            style={{
-                                display: "inline-block",
-                                height: 1.5,
-                                background: "currentColor",
-                                flexShrink: 0,
-                            }}
-                        />
                     </motion.span>
-                    {/* TESTO: compare con un leggero scivolamento da sinistra
-                        (dalla punta della coda) dopo che questa si e' aperta,
-                        cosi' da sembrare "estratto" dalla stellina invece che
-                        apparire di colpo. */}
+                    {/* TESTO: effetto "srotolamento" - ogni lettera scivola
+                        verso destra dalla propria posizione decentrata fino
+                        al punto naturale, in sequenza (piccolo delay
+                        crescente lettera per lettera). Il colore hover
+                        resta sull'involucro esterno cosi' tutte le lettere
+                        lo ereditano insieme, senza interferire con lo
+                        stagger dell'entrata. */}
                     <motion.span
-                        key={`label-${activeIndex}`}
-                        initial={{ opacity: 0, x: -10 }}
+                        initial={false}
                         animate={{
-                            opacity: 1,
-                            x: 0,
                             color:
                                 isLabelHovered && canHover
                                     ? "#A6FF00"
                                     : textColor,
                         }}
-                        transition={{
-                            opacity: { duration: 0.3, delay: 0.52, ease: "easeOut" },
-                            x: { duration: 0.3, delay: 0.52, ease: "easeOut" },
-                            color: { duration: 1.15, ease: "easeInOut" },
-                        }}
+                        transition={{ duration: 1.15, ease: "easeInOut" }}
                         style={{
+                            display: "inline-flex",
                             lineHeight: 1.1,
                             textShadow:
                                 isLabelHovered && canHover
@@ -550,7 +528,26 @@ export default function TimedEllipticalMenu({
                                     : "0 0 0 rgba(0, 0, 0, 0)",
                         }}
                     >
-                        {activeItem.label}
+                        <motion.span
+                            key={`label-${activeIndex}`}
+                            style={{ display: "inline-flex" }}
+                        >
+                            {activeItem.label.split("").map((char, charIndex) => (
+                                <motion.span
+                                    key={charIndex}
+                                    initial={{ opacity: 0, x: -16 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{
+                                        duration: 0.28,
+                                        delay: 0.35 + charIndex * 0.028,
+                                        ease: "easeOut",
+                                    }}
+                                    style={{ display: "inline-block" }}
+                                >
+                                    {char === " " ? "\u00A0" : char}
+                                </motion.span>
+                            ))}
+                        </motion.span>
                     </motion.span>
                 </motion.span>
             </a>
