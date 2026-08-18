@@ -44,65 +44,6 @@ const VIDEO_PLAYLIST = [
     VIDEO_SOURCES.EXHIBITIONS,
 ]
 
-// Numero di "lastre" verticali in cui il testo viene tagliato per
-// simulare la rifrazione: ognuna mostra solo una fetta verticale della
-// scritta (via clip-path) e parte leggermente sfalsata in orizzontale,
-// come se un vetro rompesse la scritta lungo linee verticali. Le lastre
-// convergono verso la posizione corretta con un lieve "sfasamento" a
-// cascata (delay crescente), niente rimbalzo/elastico (ease "easeOut",
-// nessuno spring): l'effetto e' un assestamento netto, non un boing.
-const REFRACTION_SLICES = 7
-
-function RefractedLabel({ text, textShadow }) {
-    return (
-        <span
-            aria-label={text}
-            style={{ position: "relative", display: "inline-block" }}
-        >
-            {/* Copia invisibile: riserva lo spazio (larghezza/altezza)
-                esatto del testo, cosi' il layout non salta quando le
-                lastre animate (posizionate in absolute) si muovono. */}
-            <span aria-hidden="true" style={{ visibility: "hidden" }}>
-                {text}
-            </span>
-            {Array.from({ length: REFRACTION_SLICES }).map((_, sliceIndex) => {
-                const startPct = (sliceIndex * 100) / REFRACTION_SLICES
-                const endPct =
-                    100 - ((sliceIndex + 1) * 100) / REFRACTION_SLICES
-                // Alterna il verso dello sfasamento (sinistra/destra) e
-                // la leggera inclinazione (skew), come lastre di vetro
-                // rotte che rifrangono la luce in direzioni diverse.
-                const direction = sliceIndex % 2 === 0 ? -1 : 1
-                const offset = direction * (14 - sliceIndex * 1.2)
-                const skew = direction * (9 - sliceIndex * 0.6)
-                return (
-                    <motion.span
-                        key={sliceIndex}
-                        aria-hidden="true"
-                        initial={{ x: offset, skewX: skew, opacity: 0.3 }}
-                        animate={{ x: 0, skewX: 0, opacity: 1 }}
-                        transition={{
-                            duration: 0.5,
-                            delay: sliceIndex * 0.035,
-                            ease: "easeOut",
-                        }}
-                        style={{
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            whiteSpace: "nowrap",
-                            clipPath: `inset(0 ${endPct}% 0 ${startPct}%)`,
-                            textShadow,
-                        }}
-                    >
-                        {text}
-                    </motion.span>
-                )
-            })}
-        </span>
-    )
-}
-
 /**
  * Menu ellittico animato a rotazione temporizzata.
  *
@@ -115,8 +56,8 @@ function RefractedLabel({ text, textShadow }) {
  */
 export default function TimedEllipticalMenu({
     durationSeconds = 3,
-    textColor = "#FF4F17",
-    markerColor = "#FF4F17",
+    textColor = "#FFFFFF",
+    markerColor = "#FFFFFF",
     fontSize = 15,
     markerWidth = 14,
 }) {
@@ -400,8 +341,7 @@ export default function TimedEllipticalMenu({
                     }}
                 />
             </div>
-            {/* Intestazione statica: stesso font/stile del menu, ora
-                arancione (CMYK 0,69,91,0 = #FF4F17) invece di bianca,
+            {/* Intestazione statica: stesso font/stile del menu, sempre bianca,
                 non è un link, non cambia colore e non si muove mai.
                 Posizione e dimensione ora IDENTICHE a quelle di
                 PageHeader.jsx (usato in /exhibitions e nelle altre pagine
@@ -415,7 +355,7 @@ export default function TimedEllipticalMenu({
                     zIndex: 2,
                     top: isPhone ? 10 : 12,
                     left: isPhone ? 20 : 56,
-                    color: "#FF4F17",
+                    color: "#FFFFFF",
                     textTransform: "uppercase",
                     letterSpacing: "0.7px",
                     fontFamily: "Inter, Helvetica, Arial, sans-serif",
@@ -479,18 +419,19 @@ export default function TimedEllipticalMenu({
                 }}
                 aria-label={`Open ${activeItem.label}`}
             >
-                {/* Il testo ruota al click, attorno all'asse orizzontale
-                    (rotateX) - l'effetto "si avvita su se stesso" al click,
-                    invariato rispetto a prima.
-                    Il rettangolo (marker) che precedeva la scritta e il suo
-                    effetto "boing" (l'allargamento elastico ad ogni cambio
-                    voce) sono stati rimossi del tutto, come richiesto.
-                    Al posto del boing, ogni volta che la voce attiva cambia
-                    (key={activeIndex} fa rimontare RefractedLabel, quindi
-                    l'animazione initial->animate riparte da capo) le
-                    lettere entrano con un effetto di rifrazione: sembrano
-                    tagliate verticalmente come vetro rotto, e si
-                    ricompongono nella posizione corretta. */}
+                {/* Marker (rettangolo) + testo ruotano INSIEME al click,
+                    attorno all'asse orizzontale (rotateX) - questo e'
+                    l'effetto "si avvitano su se stesse" al click.
+                    IMPORTANTE: niente piu' key={twistCount} qui. Con la key
+                    l'intero blocco (marker compreso) veniva SMONTATO e
+                    RIMONTATO ad ogni click, e questo faceva ripartire anche
+                    l'animazione di allargamento del marker qui sotto - che
+                    invece deve animarsi SOLO quando cambia la voce attiva
+                    (key={`${activeIndex}-${markerWidth}`}), non ad ogni
+                    click. Usando un valore di rotazione cumulativo
+                    (twistCount * 360) invece della key, il blocco resta
+                    montato: il click continua a farlo girare su se stesso,
+                    ma il marker sotto non viene piu' "risvegliato" a torto. */}
                 <motion.span
                     initial={false}
                     animate={{ rotateX: twistCount * 360 }}
@@ -498,6 +439,7 @@ export default function TimedEllipticalMenu({
                     style={{
                         display: "inline-flex",
                         alignItems: "center",
+                        gap: 10,
                         transformStyle: "preserve-3d",
                     }}
                 >
@@ -507,20 +449,57 @@ export default function TimedEllipticalMenu({
                             color:
                                 isLabelHovered && canHover
                                     ? "#A6FF00"
+                                    : markerColor,
+                            boxShadow:
+                                isLabelHovered && canHover
+                                    ? "0 0 8px rgba(166, 255, 0, 0.55)"
+                                    : "0 0 0 rgba(0, 0, 0, 0)",
+                        }}
+                        transition={{ duration: 1.15, ease: "easeInOut" }}
+                        style={{ display: "inline-flex", flexShrink: 0 }}
+                    >
+                        <motion.span
+                            key={`${activeIndex}-${markerWidth}`}
+                            aria-hidden="true"
+                            initial={{ width: markerWidth }}
+                            animate={{
+                                width: [
+                                    markerWidth,
+                                    expandedMarkerWidth,
+                                    markerWidth,
+                                ],
+                            }}
+                            transition={{
+                                duration: 0.42,
+                                ease: "easeInOut",
+                                times: [0, 0.45, 1],
+                            }}
+                            style={{
+                                display: "inline-block",
+                                height: 4,
+                                background: "currentColor",
+                                flexShrink: 0,
+                            }}
+                        />
+                    </motion.span>
+                    <motion.span
+                        initial={false}
+                        animate={{
+                            color:
+                                isLabelHovered && canHover
+                                    ? "#A6FF00"
                                     : textColor,
                         }}
                         transition={{ duration: 1.15, ease: "easeInOut" }}
-                        style={{ lineHeight: 1.1 }}
-                    >
-                        <RefractedLabel
-                            key={activeIndex}
-                            text={activeItem.label}
-                            textShadow={
+                        style={{
+                            lineHeight: 1.1,
+                            textShadow:
                                 isLabelHovered && canHover
                                     ? "0 0 10px rgba(166, 255, 0, 0.55)"
-                                    : "0 0 0 rgba(0, 0, 0, 0)"
-                            }
-                        />
+                                    : "0 0 0 rgba(0, 0, 0, 0)",
+                        }}
+                    >
+                        {activeItem.label}
                     </motion.span>
                 </motion.span>
             </a>
@@ -559,7 +538,7 @@ export default function TimedEllipticalMenu({
                         download
                         onClick={closeDownloadPopup}
                         style={{
-                            color: "#FF4F17",
+                            color: "#FFFFFF",
                             textDecoration: "none",
                             padding: "5px 0",
                             textAlign: "center",
@@ -577,7 +556,7 @@ export default function TimedEllipticalMenu({
                         download
                         onClick={closeDownloadPopup}
                         style={{
-                            color: "#FF4F17",
+                            color: "#FFFFFF",
                             textDecoration: "none",
                             padding: "5px 0",
                             textAlign: "center",
