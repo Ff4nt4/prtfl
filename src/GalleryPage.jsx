@@ -10,6 +10,13 @@ import {
 import PageHeader from "./PageHeader.jsx"
 import HoverGlowLink from "./HoverGlowLink.jsx"
 
+// --- COMPONENTE GENERICO DI GALLERIA A SCORRIMENTO ---
+// Estratto da ExhibitionsGallery.jsx: tutta l'impostazione (header,
+// scroller orizzontale con drag/wheel, foto uniformi in altezza mai
+// tagliate, didascalie ancorate dall'alto, footer) e' identica sia per
+// /exhibitions sia per /selected-works. Cambiano solo i CONTENUTI
+// (immagini + didascalie) e l'etichetta al centro dell'header.
+
 const FONT_FAMILY = "Inter, Helvetica, Arial, sans-serif"
 const COLOR_BLACK = "#000000"
 const COLOR_WHITE = "#FFFFFF"
@@ -27,14 +34,13 @@ export default function GalleryPage({ items, centerLabel }) {
         startScrollLeft: 0,
     })
 
-    // Layout dimensions adjusted for mobile: maximized image height & tightened text boxes against edges
-    const gap = isPhone ? 10 : 28
-    const horizontalGutter = isPhone ? 12 : 48
-    const footerEdgeGutter = isPhone ? 16 : 56
-    const headerReserved = isPhone ? 50 : 100
-    const galleryHeight = isPhone ? "84vh" : "71.4vh"
-    const bottomReservedHeight = isPhone ? 55 : 110
-    const captionsExtraGap = isPhone ? 6 : 18
+    const gap = isPhone ? 12 : 28
+    const horizontalGutter = isPhone ? 16 : 48
+    const footerEdgeGutter = isPhone ? 20 : 56
+    const headerReserved = isPhone ? 72 : 100
+    const galleryHeight = isPhone ? "75.6vh" : "71.4vh"
+    const bottomReservedHeight = isPhone ? 90 : 110
+    const captionsExtraGap = isPhone ? 14 : 18
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -146,7 +152,7 @@ export default function GalleryPage({ items, centerLabel }) {
         letterSpacing: "0.7px",
         fontFamily: FONT_FAMILY,
         fontWeight: 500,
-        fontSize: isPhone ? 15 : 18,
+        fontSize: 18,
         cursor: "pointer",
         pointerEvents: "auto",
     }
@@ -162,10 +168,10 @@ export default function GalleryPage({ items, centerLabel }) {
                 color: COLOR_BLACK,
             }}
         >
-            {/* HEADER */}
+            {/* --- HEADER FISSO --- */}
             <PageHeader centerLabel={centerLabel} />
 
-            {/* GALLERY SCROLLER AREA */}
+            {/* --- CONTENUTO PRINCIPALE --- */}
             <section
                 style={{
                     position: "absolute",
@@ -209,7 +215,7 @@ export default function GalleryPage({ items, centerLabel }) {
                             alignItems: "center",
                             gap,
                             minHeight: galleryHeight,
-                            paddingRight: isPhone ? "20vw" : "35vw",
+                            paddingRight: isPhone ? "25vw" : "35vw",
                         }}
                     >
                         {items.map((item, index) => (
@@ -238,7 +244,7 @@ export default function GalleryPage({ items, centerLabel }) {
                                         height: "100%",
                                         width: "auto",
                                         maxWidth: isPhone
-                                            ? "100vw"
+                                            ? "100.8vw"
                                             : "58.8vw",
                                         objectFit: "contain",
                                         userSelect: "none",
@@ -251,23 +257,23 @@ export default function GalleryPage({ items, centerLabel }) {
                 </div>
             </section>
 
-            {/* CAPTIONS (pushed closer to bottom/edges) */}
+            {/* --- DIDASCALIE --- */}
             <div
                 style={{
                     position: "fixed",
-                    left: isPhone ? 12 : "50vw",
+                    left: "50vw",
                     top: `calc(100vh - ${bottomReservedHeight}px + ${captionsExtraGap}px)`,
-                    width: isPhone ? "calc(100vw - 120px)" : `calc(50vw - ${horizontalGutter}px)`,
+                    width: `calc(50vw - ${horizontalGutter}px)`,
                     boxSizing: "border-box",
                     zIndex: 5,
                     userSelect: "none",
                     fontFamily: "Helvetica, Arial, sans-serif",
-                    fontSize: isPhone ? 11 : 12,
-                    lineHeight: 1.1,
+                    fontSize: 12,
+                    lineHeight: 1.05,
                     letterSpacing: "0.01em",
                     fontWeight: 500,
                     fontStyle: "normal",
-                    color: "rgba(0,0,0,0.75)",
+                    color: "rgba(0,0,0,0.7)",
                 }}
             >
                 <div style={activeItem.description ? { marginBottom: 2 } : undefined}>
@@ -278,7 +284,7 @@ export default function GalleryPage({ items, centerLabel }) {
                 ) : null}
             </div>
 
-            {/* FOOTER LINK (pushed to edge) */}
+            {/* --- FOOTER A DESTRA --- */}
             <footer
                 style={{
                     position: "fixed",
@@ -286,7 +292,7 @@ export default function GalleryPage({ items, centerLabel }) {
                     right: 0,
                     width: "auto",
                     paddingRight: footerEdgeGutter,
-                    paddingBottom: isPhone ? 8 : 12,
+                    paddingBottom: isPhone ? 10 : 12,
                     display: "flex",
                     alignItems: "flex-end",
                     justifyContent: "flex-end",
