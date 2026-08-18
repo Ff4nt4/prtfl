@@ -83,19 +83,21 @@ export default function PageHeader({ centerLabel }) {
             </HoverGlowLink>
 
             {centerLabel ? (
-                <HoverGlowLink
-                    as="div"
-                    baseColor={COLOR_BLACK}
+                // Solo testo statico: nell'header l'effetto hover/rotazione
+                // deve restare esclusivo di "CLAUDIA MANGONE". L'etichetta
+                // centrale (es. "CONTACT") qui non è un link cliccabile.
+                <div
                     style={{
                         ...navLinkStyle,
                         position: "absolute",
                         left: "52%",
                         top: headerTopOffset,
                         transform: "translateX(-50%)",
+                        pointerEvents: "none",
                     }}
                 >
                     {centerLabel}
-                </HoverGlowLink>
+                </div>
             ) : null}
         </header>
     )
