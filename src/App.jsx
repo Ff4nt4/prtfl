@@ -3,6 +3,7 @@ import { useEffect, startTransition } from "react"
 import TimedEllipticalMenu from "./TimedEllipticalMenu.jsx"
 import ExhibitionsGallery from "./ExhibitionsGallery.jsx"
 import SelectedWorksGallery from "./SelectedWorksGallery.jsx"
+import ContactsPage from "./ContactsPage.jsx"
 import CustomCursor from "./CustomCursor.jsx"
 
 // --- COMPONENTE HOME ---
@@ -81,9 +82,10 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/exhibitions" element={<ExhibitionsGallery />} />
                 <Route path="/selected-works" element={<SelectedWorksGallery />} />
+                <Route path="/contact" element={<ContactsPage />} />
 
-                {/* Aggiungi qui /contact, /clouds man mano che converti
-                    gli altri Code Component di Framer */}
+                {/* Aggiungi qui /clouds quando converti anche quel
+                    Code Component di Framer */}
             </Routes>
         </HashRouter>
     )
