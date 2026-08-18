@@ -47,7 +47,7 @@ IG claudia_mangone_`
 const ABOUT_TEXT = `Claudia Mangone (b.1996)
 Lives and works between Bergamo and Milan
 
-Education
+EDUCATION
 2021 - 2023 Master in Visual Art, ÉCAL, Lausanne
 2016 - 2021 Bachelor  in Visual Art,  Accademia di Belle Arti di Brera, Milan
 
@@ -57,18 +57,13 @@ SOLO EXHIBITIONS
 2023 Black’n’yellow Black’n’yellow, AnonimaKunsthalle, Varese
 
 SELECTED GROUP EXHIBITIONS
-2026
-- Magnolia, San Carpoforo, Milan
-2025
-- Ventaglio, Clima Gallery, Milan
-- Mostrina, Palazzo Bronzo, Genoa
-- Incandescenze e maree, YAG Garage, Pescara
-2024
-- I Re non toccano le porte, Casa Scaglioni, Castelponzone
-2022
-- Midsummer Night’s Dream, Notgalerie Skulpturenallee Seestadt, Vienna
-2021
-- Pick Clique, Como Contemporanea, Como
+2026 Magnolia, San Carpoforo, Milan
+2025 Ventaglio, Clima Gallery, Milan
+2025 Mostrina, Palazzo Bronzo, Genoa
+2025 Incandescenze e maree, YAG Garage, Pescara
+2024 I Re non toccano le porte, Casa Scaglioni, Castelponzone
+2022 Midsummer Night’s Dream, Notgalerie Skulpturenallee Seestadt, Vienna
+2021 Pick Clique, Como Contemporanea, Como
 
 RESIDENCIES
 2026 ongoing Supertoscana at Centro Pecci and MudaC, Prato and Carrara
