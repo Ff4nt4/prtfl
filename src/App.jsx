@@ -2,6 +2,7 @@ import { HashRouter, Routes, Route, useNavigate } from "react-router-dom"
 import { useEffect, startTransition } from "react"
 import TimedEllipticalMenu from "./TimedEllipticalMenu.jsx"
 import ExhibitionsGallery from "./ExhibitionsGallery.jsx"
+import SelectedWorksGallery from "./SelectedWorksGallery.jsx"
 import CustomCursor from "./CustomCursor.jsx"
 
 // --- COMPONENTE HOME ---
@@ -79,9 +80,10 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/exhibitions" element={<ExhibitionsGallery />} />
+                <Route path="/selected-works" element={<SelectedWorksGallery />} />
 
-                {/* Aggiungi qui /selected-works, /contact, /clouds man mano
-                    che converti gli altri Code Component di Framer */}
+                {/* Aggiungi qui /contact, /clouds man mano che converti
+                    gli altri Code Component di Framer */}
             </Routes>
         </HashRouter>
     )
