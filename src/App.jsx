@@ -9,8 +9,8 @@ import CustomCursor from "./CustomCursor.jsx"
 // --- COMPONENTE HOME ---
 function Home() {
     const menuConfig = {
-        textColor: "#FFFFFF",
-        markerColor: "#FFFFFF",
+        textColor: "#FF4F17",
+        markerColor: "#FF4F17",
         fontSize: 18,
         markerWidth: 14,
     }
