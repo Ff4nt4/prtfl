@@ -54,16 +54,24 @@ export default function GalleryPage({ items, centerLabel }) {
     // aumentata di poco rispetto al resto del layout della galleria.
     const footerEdgeGutter = isPhone ? 20 : 56
     const headerReserved = isPhone ? 72 : 100
-    // Foto scalate del 40% in piu' rispetto a prima (54vh/51vh -> 75.6vh/71.4vh),
-    // sempre alla stessa altezza tra loro. Stessa scala applicata anche al
-    // limite di larghezza (maxWidth qui sotto sull'<img>) per le foto molto
-    // panoramiche, cosi' la proporzione resta coerente.
-    const galleryHeight = isPhone ? "75.6vh" : "71.4vh"
-    // Spazio riservato in basso a didascalie + footer: serve per calcolare
-    // la fascia verticale in cui vive la galleria (vedi "section" piu'
-    // sotto), cosi' le foto si dispongono piu' in alto, centrate esattamente
-    // a meta' tra il fondo dell'intestazione e l'inizio di questa fascia.
-    const bottomReservedHeight = isPhone ? 90 : 110
+    // Spazio riservato in basso a didascalie + footer: ridotto rispetto a
+    // prima (90/110 -> 64/84) per lasciare piu' spazio verticale alle
+    // foto, come richiesto. Questo valore, insieme a headerReserved,
+    // definisce ESATTAMENTE la fascia verticale disponibile per la
+    // galleria (vedi "section" e galleryHeight qui sotto): tra i due non
+    // deve mai restare un residuo superiore al 50% dell'altezza pagina,
+    // cosi' le foto occupano sempre almeno meta' dell'altezza.
+    const bottomReservedHeight = isPhone ? 64 : 84
+    // FONDAMENTALE: l'altezza delle foto ora e' calcolata con la STESSA
+    // identica formula usata per l'altezza della "section" qui sotto
+    // (100vh meno le due fasce riservate), non piu' una percentuale vh
+    // fissa scollegata dallo spazio reale. Prima (75.6vh/71.4vh) poteva
+    // essere PIU' GRANDE dello spazio davvero disponibile su schermi
+    // bassi (es. telefono in orizzontale), causando foto tagliate e
+    // sovrapposte a didascalie/footer. Cosi' la foto riempie sempre
+    // esattamente la fascia disponibile, mai di piu': niente piu' tagli,
+    // niente piu' sovrapposizioni, su nessuno schermo.
+    const galleryHeight = `calc(100vh - ${headerReserved}px - ${bottomReservedHeight}px)`
     // Piccolo margine aggiuntivo SOLO per allontanare un po' le didascalie
     // dalle foto, senza toccare bottomReservedHeight (che definisce la
     // fascia della galleria, gia' corretta cosi' com'e').
@@ -73,13 +81,13 @@ export default function GalleryPage({ items, centerLabel }) {
         if (typeof window === "undefined") return
         const onResize = () => {
             startTransition(() => {
-                // Soglia abbassata da 768 a 480: un telefono in
-                // orizzontale parte da ~560-600px anche sui modelli piu'
-                // piccoli, quindi non attivera' mai piu' questo ramo -
-                // il sito su smartphone (sempre in orizzontale, vedi
-                // RotateDeviceGate.jsx) usa sempre le stesse regole del
-                // desktop, come richiesto.
-                setIsPhone(window.innerWidth <= 480)
+                // Soglia originale (768): un telefono in orizzontale con
+                // larghezza minore di 768px usa comunque le regole
+                // "isPhone" - il fix per la galleria tagliata non sta nel
+                // breakpoint, ma nel far coincidere sempre l'altezza delle
+                // foto con lo spazio verticale REALMENTE disponibile (vedi
+                // galleryHeight qui sotto).
+                setIsPhone(window.innerWidth <= 768)
             })
         }
         onResize()
@@ -229,7 +237,7 @@ export default function GalleryPage({ items, centerLabel }) {
                     flexDirection: "column",
                     justifyContent: "center",
                     boxSizing: "border-box",
-                    overflow: "visible",
+                    overflow: "hidden",
                     zIndex: 1,
                 }}
             >

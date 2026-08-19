@@ -86,9 +86,7 @@ export default function ContactsPage() {
         if (typeof window === "undefined") return
         const onResize = () => {
             startTransition(() => {
-                // Soglia abbassata da 768 a 480, stesso motivo spiegato
-                // in GalleryPage.jsx.
-                setIsPhone(window.innerWidth <= 480)
+                setIsPhone(window.innerWidth <= 768)
             })
         }
         onResize()

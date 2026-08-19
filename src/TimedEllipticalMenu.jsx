@@ -120,10 +120,7 @@ export default function TimedEllipticalMenu({
         () => Math.max(8, expandedMarkerWidth * 0.5),
         [expandedMarkerWidth]
     )
-    // Soglia abbassata da 520 a 480, stesso motivo spiegato in
-    // GalleryPage.jsx: un telefono in orizzontale (vedi RotateDeviceGate.jsx)
-    // non deve mai piu' attivare le regole "isPhone" del menu.
-    const isPhone = viewportWidth <= 480
+    const isPhone = viewportWidth <= 520
     const horizontalGutter = isPhone ? 16 : edgeInset
     const phoneMaxLabelWidth = useMemo(
         () =>

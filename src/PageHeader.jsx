@@ -22,10 +22,7 @@ export default function PageHeader({ centerLabel }) {
         if (typeof window === "undefined") return
         const onResize = () => {
             startTransition(() => {
-                // Soglia abbassata da 768 a 480, stesso motivo spiegato
-                // in GalleryPage.jsx: un telefono in orizzontale non deve
-                // mai piu' attivare le regole "isPhone".
-                setIsPhone(window.innerWidth <= 480)
+                setIsPhone(window.innerWidth <= 768)
             })
         }
         onResize()
