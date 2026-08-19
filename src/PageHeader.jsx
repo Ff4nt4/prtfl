@@ -83,9 +83,7 @@ export default function PageHeader({ centerLabel }) {
             </HoverGlowLink>
 
             {centerLabel ? (
-                <HoverGlowLink
-                    as="div"
-                    baseColor={COLOR_BLACK}
+                <div
                     style={{
                         ...navLinkStyle,
                         position: "absolute",
@@ -96,7 +94,7 @@ export default function PageHeader({ centerLabel }) {
                     }}
                 >
                     {centerLabel}
-                </HoverGlowLink>
+                </div>
             ) : null}
         </header>
     )
