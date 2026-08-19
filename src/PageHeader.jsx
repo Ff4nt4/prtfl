@@ -1,4 +1,5 @@
 import { useEffect, useState, startTransition } from "react"
+import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- HEADER CONDIVISO PER LE PAGINE SECONDARIE ---
 // Estratto da ExhibitionsGallery.jsx e reso un componente a se' stante
@@ -68,8 +69,9 @@ export default function PageHeader({ centerLabel }) {
                 pointerEvents: "none",
             }}
         >
-            <a
+            <HoverGlowLink
                 href="/"
+                baseColor={COLOR_BLACK}
                 style={{
                     ...navLinkStyle,
                     position: "absolute",
@@ -78,10 +80,12 @@ export default function PageHeader({ centerLabel }) {
                 }}
             >
                 CLAUDIA MANGONE
-            </a>
+            </HoverGlowLink>
 
             {centerLabel ? (
-                <div
+                <HoverGlowLink
+                    as="div"
+                    baseColor={COLOR_BLACK}
                     style={{
                         ...navLinkStyle,
                         position: "absolute",
@@ -92,7 +96,7 @@ export default function PageHeader({ centerLabel }) {
                     }}
                 >
                     {centerLabel}
-                </div>
+                </HoverGlowLink>
             ) : null}
         </header>
     )
