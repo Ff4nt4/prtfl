@@ -82,6 +82,10 @@ export default function GalleryPage({ items, centerLabel }) {
     // dalle foto, senza toccare bottomReservedHeight (che definisce la
     // fascia della galleria, gia' corretta cosi' com'e').
     const captionsExtraGap = isPhone ? 14 : 18
+    // Su smartphone le didascalie vengono alzate di una riga (~16px)
+    // per non accavallarsi al footer "CONTACT" in basso a destra, che
+    // su schermi stretti e' piu' vicino al bordo inferiore.
+    const captionsPhoneLift = isPhone ? 16 : 0
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -410,7 +414,7 @@ export default function GalleryPage({ items, centerLabel }) {
                     // che da meta' pagina, dove su schermi stretti
                     // lascerebbero troppo poco spazio al testo.
                     left: isPhone ? horizontalGutter : "50vw",
-                    top: `calc(100vh - ${bottomReservedHeight}px + ${captionsExtraGap}px)`,
+                    top: `calc(100vh - ${bottomReservedHeight}px + ${captionsExtraGap}px - ${captionsPhoneLift}px)`,
                     width: isPhone
                         ? `calc(100vw - ${horizontalGutter * 2}px)`
                         : `calc(50vw - ${horizontalGutter}px)`,

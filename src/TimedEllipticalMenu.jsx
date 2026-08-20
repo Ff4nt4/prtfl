@@ -175,6 +175,17 @@ export default function TimedEllipticalMenu({
         if (!isInView) return
         if (!videoRef.current) return
 
+        // FIX AUTOPLAY MOBILE: l'attributo "muted" impostato via JSX non
+        // basta su iOS/Android - React lo scrive come attributo HTML, ma
+        // Safari/Chrome mobile controllano la PROPRIETA' JS dell'elemento
+        // <video> per decidere se l'autoplay e' permesso. Se la proprieta'
+        // non risulta esplicitamente true PRIMA di play(), il browser
+        // blocca silenziosamente la riproduzione (da qui lo sfondo nero
+        // fisso, invisibile solo su smartphone). Impostandola qui a mano,
+        // subito prima di ogni play(), il video riparte correttamente.
+        videoRef.current.muted = true
+        videoRef.current.defaultMuted = true
+
         const playPromise = videoRef.current.play()
         if (playPromise && typeof playPromise.catch === "function") {
             playPromise.catch(() => {
@@ -336,9 +347,11 @@ export default function TimedEllipticalMenu({
                     src={activeVideoSrc ?? undefined}
                     autoPlay
                     muted
+                    defaultMuted
                     playsInline
+                    webkit-playsinline="true"
                     controls={false}
-                    preload="metadata"
+                    preload="auto"
                     onEnded={advanceVideo}
                     style={{
                         width: "100%",
