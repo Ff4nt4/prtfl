@@ -8,7 +8,6 @@ import {
 } from "react"
 
 import PageHeader from "./PageHeader.jsx"
-import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- COMPONENTE GENERICO DI GALLERIA A SCORRIMENTO ---
 // Estratto da ExhibitionsGallery.jsx: tutta l'impostazione (header,
@@ -51,6 +50,12 @@ export default function GalleryPage({ items, centerLabel }) {
 
     const gap = isPhone ? 12 : 28
     const horizontalGutter = isPhone ? 16 : 48
+    // Larghezza fissa delle foto SOLO su smartphone: la galleria li'
+    // scorre in verticale (dall'alto verso il basso) invece che in
+    // orizzontale come su desktop, quindi qui e' la larghezza ad essere
+    // fissa (piena larghezza pagina meno i margini laterali) e l'altezza
+    // a seguire liberamente le proporzioni naturali di ogni foto.
+    const photoWidthPhone = `calc(100vw - ${horizontalGutter * 2}px)`
     // Gutter dedicato al footer (CONTACTS): distanza dal bordo destro
     // aumentata di poco rispetto al resto del layout della galleria.
     const footerEdgeGutter = isPhone ? 20 : 56
@@ -119,15 +124,23 @@ export default function GalleryPage({ items, centerLabel }) {
         if (typeof window === "undefined") return
         if (!scrollerRef.current) return
         const scrollerRect = scrollerRef.current.getBoundingClientRect()
-        const centerX = scrollerRect.left + scrollerRect.width / 2
+        // Su desktop la galleria scorre in orizzontale, quindi l'elemento
+        // "attivo" e' quello piu' vicino al centro orizzontale dello
+        // scroller. Su smartphone scorre in verticale: stessa logica, ma
+        // sull'asse Y invece che X.
+        const scrollerCenter = isPhone
+            ? scrollerRect.top + scrollerRect.height / 2
+            : scrollerRect.left + scrollerRect.width / 2
 
         let closestIndex = 0
         let closestDistance = Number.POSITIVE_INFINITY
         itemRefs.current.forEach((node, index) => {
             if (!node) return
             const rect = node.getBoundingClientRect()
-            const itemCenter = rect.left + rect.width / 2
-            const distance = Math.abs(centerX - itemCenter)
+            const itemCenter = isPhone
+                ? rect.top + rect.height / 2
+                : rect.left + rect.width / 2
+            const distance = Math.abs(scrollerCenter - itemCenter)
             if (distance < closestDistance) {
                 closestDistance = distance
                 closestIndex = index
@@ -137,7 +150,7 @@ export default function GalleryPage({ items, centerLabel }) {
         startTransition(() => {
             setActiveIndex(closestIndex)
         })
-    }, [])
+    }, [isPhone])
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -160,31 +173,55 @@ export default function GalleryPage({ items, centerLabel }) {
         }
     }, [updateCenteredItem])
 
-    const onWheel = useCallback((event) => {
-        if (!scrollerRef.current) return
-        scrollerRef.current.scrollLeft += event.deltaY + event.deltaX
-    }, [])
+    const onWheel = useCallback(
+        (event) => {
+            // Su smartphone la galleria scorre in verticale: la rotellina
+            // (o il gesto touch) deve scorrere nativamente come farebbe
+            // qualsiasi altro elemento con overflow-y, quindi qui non
+            // c'e' nulla da redirigere.
+            if (isPhone) return
+            if (!scrollerRef.current) return
+            scrollerRef.current.scrollLeft += event.deltaY + event.deltaX
+        },
+        [isPhone]
+    )
 
-    const onPointerDown = useCallback((event) => {
-        if (!scrollerRef.current) return
-        dragStateRef.current.dragging = true
-        dragStateRef.current.startX = event.clientX
-        dragStateRef.current.startScrollLeft = scrollerRef.current.scrollLeft
-        scrollerRef.current.setPointerCapture(event.pointerId)
-    }, [])
+    const onPointerDown = useCallback(
+        (event) => {
+            // Su smartphone lo scorrimento verticale e' nativo (nessuna
+            // simulazione di drag da fare, a differenza del trascinamento
+            // orizzontale su desktop che serve per emulare lo scroll con
+            // mouse/trackpad su un asse che il browser non gestisce da solo).
+            if (isPhone) return
+            if (!scrollerRef.current) return
+            dragStateRef.current.dragging = true
+            dragStateRef.current.startX = event.clientX
+            dragStateRef.current.startScrollLeft = scrollerRef.current.scrollLeft
+            scrollerRef.current.setPointerCapture(event.pointerId)
+        },
+        [isPhone]
+    )
 
-    const onPointerMove = useCallback((event) => {
-        if (!scrollerRef.current || !dragStateRef.current.dragging) return
-        const delta = event.clientX - dragStateRef.current.startX
-        scrollerRef.current.scrollLeft =
-            dragStateRef.current.startScrollLeft - delta
-    }, [])
+    const onPointerMove = useCallback(
+        (event) => {
+            if (isPhone) return
+            if (!scrollerRef.current || !dragStateRef.current.dragging) return
+            const delta = event.clientX - dragStateRef.current.startX
+            scrollerRef.current.scrollLeft =
+                dragStateRef.current.startScrollLeft - delta
+        },
+        [isPhone]
+    )
 
-    const onPointerUp = useCallback((event) => {
-        if (!scrollerRef.current) return
-        dragStateRef.current.dragging = false
-        scrollerRef.current.releasePointerCapture(event.pointerId)
-    }, [])
+    const onPointerUp = useCallback(
+        (event) => {
+            if (isPhone) return
+            if (!scrollerRef.current) return
+            dragStateRef.current.dragging = false
+            scrollerRef.current.releasePointerCapture(event.pointerId)
+        },
+        [isPhone]
+    )
 
     const activeItem = useMemo(
         () => items[activeIndex] ?? items[0],
@@ -245,39 +282,58 @@ export default function GalleryPage({ items, centerLabel }) {
                 <div
                     ref={scrollerRef}
                     onWheel={onWheel}
-                    onPointerDown={onPointerDown}
-                    onPointerMove={onPointerMove}
-                    onPointerUp={onPointerUp}
-                    onPointerCancel={onPointerUp}
+                    onPointerDown={isPhone ? undefined : onPointerDown}
+                    onPointerMove={isPhone ? undefined : onPointerMove}
+                    onPointerUp={isPhone ? undefined : onPointerUp}
+                    onPointerCancel={isPhone ? undefined : onPointerUp}
                     style={{
                         width: "100%",
-                        overflowX: "auto",
-                        overflowY: "hidden",
+                        height: "100%",
+                        // Su desktop scorre in orizzontale (overflow-x),
+                        // su smartphone in verticale (overflow-y) - questa
+                        // e' la differenza chiave richiesta: altezza fissa
+                        // + scorrimento a destra su desktop, larghezza
+                        // fissa + scorrimento in basso su smartphone.
+                        overflowX: isPhone ? "hidden" : "auto",
+                        overflowY: isPhone ? "auto" : "hidden",
                         scrollbarWidth: "none",
                         msOverflowStyle: "none",
-                        touchAction: "pan-x",
-                        cursor: dragStateRef.current.dragging
-                            ? "grabbing"
-                            : "grab",
-                        // A riposo (scrollLeft 0), non e' il BORDO sinistro
-                        // della prima foto a partire dal centro della
-                        // pagina: e' il suo ASSE VERTICALE (centro) a
-                        // coincidere esattamente con l'asse che divide la
-                        // pagina in due (50vw). Per questo il padding
-                        // sottrae meta' della larghezza reale della prima
-                        // foto, misurata via JS in measureFirstImage().
-                        paddingLeft: `calc(50vw - ${firstImageHalfWidth}px)`,
+                        touchAction: isPhone ? "pan-y" : "pan-x",
+                        cursor: isPhone
+                            ? "default"
+                            : dragStateRef.current.dragging
+                              ? "grabbing"
+                              : "grab",
+                        // Su desktop, a riposo (scrollLeft 0), non e' il
+                        // BORDO sinistro della prima foto a partire dal
+                        // centro della pagina: e' il suo ASSE VERTICALE
+                        // (centro) a coincidere esattamente con l'asse che
+                        // divide la pagina in due (50vw) - da qui il
+                        // paddingLeft calcolato. Su smartphone (scroll
+                        // verticale, foto a piena larghezza) questo trucco
+                        // non serve: basta il gutter laterale standard.
+                        paddingLeft: isPhone
+                            ? horizontalGutter
+                            : `calc(50vw - ${firstImageHalfWidth}px)`,
                         paddingRight: horizontalGutter,
+                        paddingTop: isPhone ? gap : 0,
                         boxSizing: "border-box",
                     }}
                 >
                     <div
                         style={{
-                            display: "inline-flex",
+                            display: isPhone ? "flex" : "inline-flex",
+                            flexDirection: isPhone ? "column" : "row",
                             alignItems: "center",
                             gap,
-                            minHeight: galleryHeight,
-                            paddingRight: isPhone ? "25vw" : "35vw",
+                            minHeight: isPhone ? "auto" : galleryHeight,
+                            width: isPhone ? "100%" : "auto",
+                            // Spazio finale: su desktop a destra (permette
+                            // di scorrere l'ultima foto fino al centro),
+                            // su smartphone in basso (stesso scopo, sul
+                            // nuovo asse verticale).
+                            paddingRight: isPhone ? 0 : "35vw",
+                            paddingBottom: isPhone ? "20vh" : 0,
                         }}
                     >
                         {items.map((item, index) => (
@@ -287,12 +343,15 @@ export default function GalleryPage({ items, centerLabel }) {
                                     itemRefs.current[index] = node
                                 }}
                                 style={{
-                                    height: galleryHeight,
-                                    // Niente larghezza fissa: la larghezza
-                                    // segue quella naturale della foto,
-                                    // cosi' le proporzioni originali sono
-                                    // sempre rispettate (mai tagliate).
-                                    width: "auto",
+                                    height: isPhone ? "auto" : galleryHeight,
+                                    // Su desktop niente larghezza fissa (la
+                                    // larghezza segue l'altezza fissa e le
+                                    // proporzioni naturali). Su smartphone
+                                    // e' l'opposto: larghezza fissa, altezza
+                                    // libera - cosi' le proporzioni restano
+                                    // comunque rispettate, solo sull'asse
+                                    // opposto.
+                                    width: isPhone ? photoWidthPhone : "auto",
                                     flex: "0 0 auto",
                                 }}
                             >
@@ -307,16 +366,18 @@ export default function GalleryPage({ items, centerLabel }) {
                                     alt={item.title}
                                     draggable={false}
                                     style={{
-                                        height: "100%",
-                                        width: "auto",
-                                        // Limite di larghezza solo per le
-                                        // foto molto panoramiche: objectFit
+                                        height: isPhone ? "auto" : "100%",
+                                        width: isPhone ? "100%" : "auto",
+                                        // Su desktop limite di LARGHEZZA per
+                                        // le foto molto panoramiche; su
+                                        // smartphone limite di ALTEZZA per
+                                        // quelle molto verticali - in
+                                        // entrambi i casi objectFit
                                         // "contain" garantisce che l'intera
                                         // immagine resti visibile, senza
-                                        // ritagli, anche quando scatta.
-                                        maxWidth: isPhone
-                                            ? "100.8vw"
-                                            : "58.8vw",
+                                        // mai essere tagliata.
+                                        maxWidth: isPhone ? "none" : "58.8vw",
+                                        maxHeight: isPhone ? "70vh" : "none",
                                         objectFit: "contain",
                                         userSelect: "none",
                                         display: "block",
@@ -383,9 +444,9 @@ export default function GalleryPage({ items, centerLabel }) {
                     zIndex: 10,
                 }}
             >
-                <HoverGlowLink href="/contact" baseColor={COLOR_BLACK} style={navLinkStyle}>
+                <a href="/contact" style={navLinkStyle}>
                     CONTACT
-                </HoverGlowLink>
+                </a>
             </footer>
         </main>
     )

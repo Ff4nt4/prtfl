@@ -34,14 +34,8 @@ export default function PageHeader({ centerLabel }) {
     // Distanza dai bordi laterali aumentata di poco (16/48 -> 20/56).
     const horizontalGutter = isPhone ? 20 : 56
     const headerHeight = isPhone ? 72 : 100
-    // Distanza dal bordo superiore ridotta al minimo (20/26 -> 10/12):
-    // un piccolo margine resta per non far toccare letteralmente il testo
-    // al bordo della pagina. Stesso valore per ogni pagina che monta
-    // questo componente, quindi il punto resta identico ovunque.
     const headerTopOffset = isPhone ? 10 : 12
 
-    // Font almeno 18px, come richiesto per tutte le scritte in maiuscolo
-    // di header, footer e homepage.
     const navLinkStyle = {
         textDecoration: "none",
         color: COLOR_BLACK,
@@ -69,6 +63,8 @@ export default function PageHeader({ centerLabel }) {
                 pointerEvents: "none",
             }}
         >
+            {/* HoverGlowLink: ripristinato l'effetto glow lime al passaggio
+                del cursore (solo desktop, canHover), come nel menu principale. */}
             <HoverGlowLink
                 href="/"
                 baseColor={COLOR_BLACK}
