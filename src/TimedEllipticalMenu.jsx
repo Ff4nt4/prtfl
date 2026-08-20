@@ -21,6 +21,10 @@ import { motion, useInView } from "framer-motion"
 // al file per le dimensioni consigliate e i limiti di GitHub).
 import selectedWorksVideo from "./assets/videos/selected-works.mp4"
 import exhibitionsVideo from "./assets/videos/exhibitions.mp4"
+// Video verticale dedicato allo sfondo della Home su smartphone: sostituisce
+// il ciclo dei due video "reel" (selected-works/exhibitions), che restano
+// invece usati solo su desktop/tablet (vedi effectiveVideoSrc piu' sotto).
+import mobileVideo from "./assets/videos/mobile.mp4"
 
 const MENU_ITEMS = [
     {
@@ -121,6 +125,11 @@ export default function TimedEllipticalMenu({
         [expandedMarkerWidth]
     )
     const isPhone = viewportWidth <= 520
+    // Su smartphone lo sfondo e' il video verticale dedicato (mobile.mp4),
+    // fisso (nessun ciclo tra "reel"). Su desktop/tablet resta il
+    // comportamento originale: ciclo tra selected-works.mp4 ed
+    // exhibitions.mp4, sincronizzato con la voce di menu attiva.
+    const effectiveVideoSrc = isPhone ? mobileVideo : activeVideoSrc
     const horizontalGutter = isPhone ? 16 : edgeInset
     const phoneMaxLabelWidth = useMemo(
         () =>
@@ -192,7 +201,7 @@ export default function TimedEllipticalMenu({
                 // Ignora silenziosamente gli errori di autoplay bloccato dal browser.
             })
         }
-    }, [activeVideoSrc, isInView])
+    }, [effectiveVideoSrc, isInView])
 
     // FALLBACK: su alcuni browser mobile (es. Android con risparmio dati/
     // batteria attivo) l'autoplay resta bloccato anche con muted impostato
@@ -380,15 +389,16 @@ export default function TimedEllipticalMenu({
             >
                 <video
                     ref={videoRef}
-                    src={activeVideoSrc ?? undefined}
+                    src={effectiveVideoSrc ?? undefined}
                     autoPlay
                     muted
                     defaultMuted
+                    loop={isPhone}
                     playsInline
                     webkit-playsinline="true"
                     controls={false}
                     preload="auto"
-                    onEnded={advanceVideo}
+                    onEnded={isPhone ? undefined : advanceVideo}
                     style={{
                         width: "100%",
                         height: "100%",
@@ -720,4 +730,9 @@ export default function TimedEllipticalMenu({
  *   qui sopra (selected-works.mp4, exhibitions.mp4). Per aggiungere un
  *   terzo video, aggiungi un nuovo import e una nuova voce in
  *   VIDEO_SOURCES/VIDEO_PLAYLIST.
+ * - mobile.mp4 (in src/assets/videos/mobile.mp4) e' un video verticale
+ *   dedicato, usato SOLO su smartphone (isPhone, viewportWidth <= 520)
+ *   al posto del ciclo selected-works/exhibitions. E' in loop singolo
+ *   (loop={isPhone}), non avanza la playlist desktop. Su desktop/tablet
+ *   il comportamento resta identico a prima.
  */
