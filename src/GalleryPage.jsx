@@ -68,11 +68,12 @@ export default function GalleryPage({ items, centerLabel }) {
     // deve mai restare un residuo superiore al 50% dell'altezza pagina,
     // cosi' le foto occupano sempre almeno meta' dell'altezza.
     const bottomReservedHeight = isPhone ? 64 : 84
-    // Piccolo margine bianco aggiuntivo SOLO su smartphone, tra
-    // l'header e l'inizio delle foto: riduce di conseguenza l'altezza
-    // della galleria (vedi galleryHeight sotto), cosi' le foto non
-    // toccano subito il fondo dell'header.
-    const galleryTopGapPhone = isPhone ? 18 : 0
+    // Spazio bianco aggiuntivo SOLO su smartphone, tra il FONDO delle
+    // foto e le didascalie sotto (non tra header e foto): riduce di
+    // conseguenza l'altezza della galleria dal basso, cosi' le foto
+    // finiscono un po' prima e lasciano un margine visibile prima del
+    // testo della didascalia.
+    const galleryBottomGapPhone = isPhone ? 18 : 0
     // FONDAMENTALE: l'altezza delle foto ora e' calcolata con la STESSA
     // identica formula usata per l'altezza della "section" qui sotto
     // (100vh meno le due fasce riservate), non piu' una percentuale vh
@@ -82,7 +83,7 @@ export default function GalleryPage({ items, centerLabel }) {
     // sovrapposte a didascalie/footer. Cosi' la foto riempie sempre
     // esattamente la fascia disponibile, mai di piu': niente piu' tagli,
     // niente piu' sovrapposizioni, su nessuno schermo.
-    const galleryHeight = `calc(100vh - ${headerReserved}px - ${galleryTopGapPhone}px - ${bottomReservedHeight}px)`
+    const galleryHeight = `calc(100vh - ${headerReserved}px - ${bottomReservedHeight}px - ${galleryBottomGapPhone}px)`
     // Piccolo margine aggiuntivo SOLO per allontanare un po' le didascalie
     // dalle foto, senza toccare bottomReservedHeight (che definisce la
     // fascia della galleria, gia' corretta cosi' com'e').
@@ -276,10 +277,10 @@ export default function GalleryPage({ items, centerLabel }) {
             <section
                 style={{
                     position: "absolute",
-                    top: headerReserved + galleryTopGapPhone,
+                    top: headerReserved,
                     left: 0,
                     right: 0,
-                    height: `calc(100vh - ${headerReserved}px - ${galleryTopGapPhone}px - ${bottomReservedHeight}px)`,
+                    height: `calc(100vh - ${headerReserved}px - ${bottomReservedHeight}px - ${galleryBottomGapPhone}px)`,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",

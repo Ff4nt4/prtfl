@@ -152,6 +152,7 @@ export default function ContactsPage() {
                             baseColor="rgba(0,0,0,0.7)"
                             style={captionLinkStyle}
                             autoAnimatePhone
+                            autoAnimateDelayMs={0}
                         >
                             claudiamangone4@gmail.com
                         </HoverGlowLink>
@@ -165,6 +166,7 @@ export default function ContactsPage() {
                             baseColor="rgba(0,0,0,0.7)"
                             style={captionLinkStyle}
                             autoAnimatePhone
+                            autoAnimateDelayMs={1000}
                         >
                             claudia_mangone_
                         </HoverGlowLink>

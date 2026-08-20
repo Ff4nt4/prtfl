@@ -32,6 +32,11 @@ export default function HoverGlowLink({
     // altrimenti l'hover (che su touch non esiste) non farebbe mai vedere
     // l'effetto.
     autoAnimatePhone = false,
+    // Ritardo (ms) prima del primo scatto dell'animazione automatica
+    // (solo se autoAnimatePhone e' attivo): permette di sfalsare
+    // leggermente due link che animano insieme (es. mail e Instagram
+    // nella pagina Contatti), cosi' non scattano in modo identico.
+    autoAnimateDelayMs = 0,
     ...rest
 }) {
     const [canHover, setCanHover] = useState(false)
@@ -60,18 +65,32 @@ export default function HoverGlowLink({
 
     // Animazione automatica ogni 3s, solo su dispositivi senza hover reale
     // (smartphone) e solo se richiesta esplicitamente (autoAnimatePhone).
+    // Il primo scatto parte dopo autoAnimateDelayMs (per sfalsare piu'
+    // link che animano insieme), poi prosegue ogni 3s da li'.
     useEffect(() => {
         if (!autoAnimatePhone) return
         if (canHover) return
         if (typeof window === "undefined") return
-        const intervalId = window.setInterval(() => {
+
+        let intervalId
+        const timeoutId = window.setTimeout(() => {
             startTransition(() => {
                 setAutoActive((prev) => !prev)
                 setTwistCount((prev) => prev + 1)
             })
-        }, 3000)
-        return () => window.clearInterval(intervalId)
-    }, [autoAnimatePhone, canHover])
+            intervalId = window.setInterval(() => {
+                startTransition(() => {
+                    setAutoActive((prev) => !prev)
+                    setTwistCount((prev) => prev + 1)
+                })
+            }, 3000)
+        }, autoAnimateDelayMs)
+
+        return () => {
+            window.clearTimeout(timeoutId)
+            if (intervalId) window.clearInterval(intervalId)
+        }
+    }, [autoAnimatePhone, canHover, autoAnimateDelayMs])
 
     const handleEnter = useCallback(() => {
         if (!canHover) return
