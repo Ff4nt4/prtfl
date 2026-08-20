@@ -151,9 +151,24 @@ export default function TimedEllipticalMenu({
         if (!isInView) return
         if (typeof window === "undefined") return
         if (isDownloadPopupOpen) return
+        // Il timer resta sospeso finche' il cursore e' sopra la voce
+        // attiva (isLabelHovered, gia' aggiornato da
+        // handleLabelHoverEnter/Leave qui sotto, e attivo solo su
+        // dispositivi con hover vero - canHover). Appena il cursore si
+        // sposta via, isLabelHovered torna false: questo effect riparte
+        // e la voce resta visibile per i pieni 3 secondi successivi,
+        // cosi' c'e' sempre tempo comodo per cliccare.
+        if (isLabelHovered) return
         const timeoutId = window.setTimeout(advance, activeDurationMs)
         return () => window.clearTimeout(timeoutId)
-    }, [activeDurationMs, activeIndex, advance, isDownloadPopupOpen, isInView])
+    }, [
+        activeDurationMs,
+        activeIndex,
+        advance,
+        isDownloadPopupOpen,
+        isInView,
+        isLabelHovered,
+    ])
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -423,6 +438,25 @@ export default function TimedEllipticalMenu({
                 }}
                 aria-label={`Open ${activeItem.label}`}
             >
+                {/* Area cliccabile allargata: elemento invisibile che si
+                    estende oltre i bordi visibili del link (grazie a
+                    "position: absolute" + inset negativo, con l'<a> come
+                    riferimento di posizionamento). Essendo un discendente
+                    dell'<a>, ci si puo' cliccare/passarci sopra col
+                    cursore normalmente (l'evento risale comunque all'<a>)
+                    - ma NON sposta ne' ridimensiona il testo visibile,
+                    che resta esattamente dove/come prima: il centraggio
+                    (transform: translate(-50%,-50%) sull'<a>) si basa
+                    sulla sua box di contenuto normale, che un figlio
+                    assoluto in overflow non altera. */}
+                <span
+                    aria-hidden="true"
+                    style={{
+                        position: "absolute",
+                        inset: -22,
+                        pointerEvents: "auto",
+                    }}
+                />
                 {/* Marker (stellina ✦) + testo (diviso lettera per lettera)
                     ruotano INSIEME al click, attorno all'asse orizzontale
                     (rotateX) - questo e' l'effetto "si avvitano su se
