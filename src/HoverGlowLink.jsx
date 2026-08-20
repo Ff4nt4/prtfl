@@ -26,11 +26,18 @@ export default function HoverGlowLink({
     style,
     children,
     onClick,
+    // Se true, su smartphone (assenza di hover reale) il link esegue da
+    // solo l'effetto rotazione+glow ogni 3 secondi, alternandosi con lo
+    // stato normale - usato in ContactsPage.jsx per email/Instagram, dove
+    // altrimenti l'hover (che su touch non esiste) non farebbe mai vedere
+    // l'effetto.
+    autoAnimatePhone = false,
     ...rest
 }) {
     const [canHover, setCanHover] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
     const [twistCount, setTwistCount] = useState(0)
+    const [autoActive, setAutoActive] = useState(false)
 
     // Rileva se il dispositivo ha davvero un mouse (hover reale): su touch
     // l'effetto di rotazione/bagliore al passaggio del dito non ha senso,
@@ -50,6 +57,21 @@ export default function HoverGlowLink({
         mediaQuery.addEventListener("change", update)
         return () => mediaQuery.removeEventListener("change", update)
     }, [])
+
+    // Animazione automatica ogni 3s, solo su dispositivi senza hover reale
+    // (smartphone) e solo se richiesta esplicitamente (autoAnimatePhone).
+    useEffect(() => {
+        if (!autoAnimatePhone) return
+        if (canHover) return
+        if (typeof window === "undefined") return
+        const intervalId = window.setInterval(() => {
+            startTransition(() => {
+                setAutoActive((prev) => !prev)
+                setTwistCount((prev) => prev + 1)
+            })
+        }, 3000)
+        return () => window.clearInterval(intervalId)
+    }, [autoAnimatePhone, canHover])
 
     const handleEnter = useCallback(() => {
         if (!canHover) return
@@ -75,6 +97,12 @@ export default function HoverGlowLink({
         [onClick]
     )
 
+    // Attivo (colore verde + glow) quando: c'e' hover reale ed e' in
+    // hover, OPPURE quando l'animazione automatica su smartphone e' nella
+    // sua fase "accesa".
+    const isGlowActive =
+        (isHovered && canHover) || (autoAnimatePhone && !canHover && autoActive)
+
     return (
         <Component
             {...rest}
@@ -97,9 +125,8 @@ export default function HoverGlowLink({
                 initial={false}
                 animate={{
                     rotateX: twistCount * 360,
-                    color: isHovered && canHover ? HOVER_COLOR : baseColor,
-                    textShadow:
-                        isHovered && canHover ? GLOW_TEXT_SHADOW : NO_TEXT_SHADOW,
+                    color: isGlowActive ? HOVER_COLOR : baseColor,
+                    textShadow: isGlowActive ? GLOW_TEXT_SHADOW : NO_TEXT_SHADOW,
                 }}
                 transition={{
                     rotateX: { duration: 0.75, ease: "easeInOut" },

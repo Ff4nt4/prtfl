@@ -194,6 +194,42 @@ export default function TimedEllipticalMenu({
         }
     }, [activeVideoSrc, isInView])
 
+    // FALLBACK: su alcuni browser mobile (es. Android con risparmio dati/
+    // batteria attivo) l'autoplay resta bloccato anche con muted impostato
+    // correttamente via JS. Come rete di sicurezza, al primo tocco/click
+    // sulla pagina (richiesto comunque per qualsiasi interazione: aprire
+    // il menu, un link, ecc.) riproviamo a far partire il video se
+    // risultasse ancora in pausa. Si toglie da solo dopo il primo utilizzo.
+    useEffect(() => {
+        if (typeof window === "undefined" || typeof document === "undefined")
+            return
+
+        const resumeVideoOnFirstInteraction = () => {
+            if (videoRef.current && videoRef.current.paused) {
+                videoRef.current.muted = true
+                const retryPromise = videoRef.current.play()
+                if (retryPromise && typeof retryPromise.catch === "function") {
+                    retryPromise.catch(() => {})
+                }
+            }
+        }
+
+        document.addEventListener("touchstart", resumeVideoOnFirstInteraction, {
+            once: true,
+            passive: true,
+        })
+        document.addEventListener("click", resumeVideoOnFirstInteraction, {
+            once: true,
+        })
+        return () => {
+            document.removeEventListener(
+                "touchstart",
+                resumeVideoOnFirstInteraction
+            )
+            document.removeEventListener("click", resumeVideoOnFirstInteraction)
+        }
+    }, [])
+
     useEffect(() => {
         if (typeof window !== "undefined") {
             const readViewport = () => {
