@@ -8,6 +8,7 @@ import {
 } from "react"
 
 import PageHeader from "./PageHeader.jsx"
+import HoverGlowLink from "./HoverGlowLink.jsx"
 
 // --- COMPONENTE GENERICO DI GALLERIA A SCORRIMENTO ---
 // Estratto da ExhibitionsGallery.jsx: tutta l'impostazione (header,
@@ -460,9 +461,9 @@ export default function GalleryPage({ items, centerLabel }) {
                     zIndex: 10,
                 }}
             >
-                <a href="/contact" style={navLinkStyle}>
+                <HoverGlowLink href="/contact" baseColor={COLOR_BLACK} style={navLinkStyle}>
                     CONTACT
-                </a>
+                </HoverGlowLink>
             </footer>
         </main>
     )
