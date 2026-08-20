@@ -129,8 +129,15 @@ export default function ContactsPage() {
             <div
                 style={{
                     paddingTop: headerReserved + topGap,
-                    marginLeft: "50vw",
-                    width: `calc(50vw - ${horizontalGutter}px)`,
+                    // Su smartphone il testo parte dal margine sinistro
+                    // (come il resto del layout mobile) invece che da
+                    // meta' pagina, dove su schermi stretti lascerebbe
+                    // troppo poco spazio.
+                    marginLeft: isPhone ? 0 : "50vw",
+                    paddingLeft: isPhone ? horizontalGutter : 0,
+                    width: isPhone
+                        ? `calc(100vw - ${horizontalGutter * 2}px)`
+                        : `calc(50vw - ${horizontalGutter}px)`,
                     paddingRight: horizontalGutter,
                     paddingBottom: isPhone ? 60 : 80,
                     boxSizing: "border-box",

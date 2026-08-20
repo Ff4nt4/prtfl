@@ -80,14 +80,29 @@ export default function PageHeader({ centerLabel }) {
 
             {centerLabel ? (
                 <div
-                    style={{
-                        ...navLinkStyle,
-                        position: "absolute",
-                        left: "52%",
-                        top: headerTopOffset,
-                        transform: "translateX(-50%)",
-                        cursor: "default",
-                    }}
+                    style={
+                        isPhone
+                            ? {
+                                  // Su smartphone "CLAUDIA MANGONE" resta dov'e'
+                                  // (in alto a sinistra): l'etichetta centrale
+                                  // va a capo su una seconda riga, sotto di
+                                  // essa, cosi' non si sovrappongono piu'.
+                                  ...navLinkStyle,
+                                  fontSize: 14,
+                                  position: "absolute",
+                                  left: horizontalGutter,
+                                  top: headerTopOffset + 22,
+                                  cursor: "default",
+                              }
+                            : {
+                                  ...navLinkStyle,
+                                  position: "absolute",
+                                  left: "52%",
+                                  top: headerTopOffset,
+                                  transform: "translateX(-50%)",
+                                  cursor: "default",
+                              }
+                    }
                 >
                     {centerLabel}
                 </div>

@@ -405,9 +405,15 @@ export default function GalleryPage({ items, centerLabel }) {
             <div
                 style={{
                     position: "fixed",
-                    left: "50vw",
+                    // Su smartphone le didascalie partono dal margine
+                    // sinistro (come il resto del layout mobile) invece
+                    // che da meta' pagina, dove su schermi stretti
+                    // lascerebbero troppo poco spazio al testo.
+                    left: isPhone ? horizontalGutter : "50vw",
                     top: `calc(100vh - ${bottomReservedHeight}px + ${captionsExtraGap}px)`,
-                    width: `calc(50vw - ${horizontalGutter}px)`,
+                    width: isPhone
+                        ? `calc(100vw - ${horizontalGutter * 2}px)`
+                        : `calc(50vw - ${horizontalGutter}px)`,
                     boxSizing: "border-box",
                     zIndex: 5,
                     userSelect: "none",
