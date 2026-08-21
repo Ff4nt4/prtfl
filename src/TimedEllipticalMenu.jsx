@@ -78,6 +78,13 @@ export default function TimedEllipticalMenu({
     })
     const containerRef = useRef(null)
     const activeLinkRef = useRef(null)
+    // Riferimento GENERICO all'elemento che ha aperto il popup di download:
+    // su smartphone e' sempre activeLinkRef (l'unica voce mostrata), su
+    // desktop e' invece il nodo della specifica voce "DOWNLOAD PORTFOLIO"
+    // cliccata (ogni voce ora vive per conto suo - vedi DesktopMenuItem).
+    // Usato per posizionare/richiudere il popup senza dover distinguere
+    // i due casi in ogni punto del codice.
+    const popupAnchorRef = useRef(null)
     const popupRef = useRef(null)
     const videoRef = useRef(null)
     // Fuori da Framer non esiste un "renderer statico" (preview/canvas):
@@ -124,7 +131,13 @@ export default function TimedEllipticalMenu({
         () => Math.max(8, expandedMarkerWidth * 0.5),
         [expandedMarkerWidth]
     )
-    const isPhone = viewportWidth <= 520
+    // Soglia UNIFORMATA con PageHeader.jsx, GalleryPage.jsx e
+    // ContactsPage.jsx (tutti a 768px): prima qui era 520px, quindi un
+    // tablet (es. iPad in verticale, ~768px) vedeva la Home in versione
+    // "desktop" ma le altre pagine in versione "phone" - layout
+    // incoerente passando da una pagina all'altra. Ora la soglia e' la
+    // stessa ovunque nel sito.
+    const isPhone = viewportWidth <= 768
     // Su smartphone lo sfondo e' il video verticale dedicato (mobile.mp4),
     // fisso (nessun ciclo tra "reel"). Su desktop/tablet resta il
     // comportamento originale: ciclo tra selected-works.mp4 ed
@@ -157,6 +170,12 @@ export default function TimedEllipticalMenu({
     const activeDurationMs = 3000
 
     useEffect(() => {
+        // Su desktop questo timer non serve piu': ogni voce gestisce da
+        // sola il proprio ciclo indipendente di comparsa/scomparsa (vedi
+        // DesktopMenuItem piu' in basso). Resta attivo solo su smartphone,
+        // dove il menu mostra ancora UNA voce alla volta che ruota tra le
+        // posizioni dell'ellisse.
+        if (!isPhone) return
         if (!isInView) return
         if (typeof window === "undefined") return
         if (isDownloadPopupOpen) return
@@ -177,6 +196,7 @@ export default function TimedEllipticalMenu({
         isDownloadPopupOpen,
         isInView,
         isLabelHovered,
+        isPhone,
     ])
 
     useEffect(() => {
@@ -304,8 +324,8 @@ export default function TimedEllipticalMenu({
 
     const updateDownloadPopupPosition = useCallback(() => {
         if (typeof window === "undefined") return
-        if (!activeLinkRef.current) return
-        const rect = activeLinkRef.current.getBoundingClientRect()
+        if (!popupAnchorRef.current) return
+        const rect = popupAnchorRef.current.getBoundingClientRect()
         const popupWidth = Math.min(96, Math.max(92, window.innerWidth - 20))
         const popupHeight = 50
         const margin = 10
@@ -323,6 +343,21 @@ export default function TimedEllipticalMenu({
             setDownloadPopupPosition({ left: safeLeftPx, top: safeTopPx })
         })
     }, [])
+
+    // Apertura del popup di download da una voce del menu DESKTOP (dove
+    // ogni voce vive per conto suo, quindi non esiste piu' un unico
+    // "activeLinkRef"): riceve direttamente il nodo DOM della voce
+    // cliccata, lo salva come ancora generica e apre/chiude il popup.
+    const openDesktopDownloadPopup = useCallback(
+        (anchorNode) => {
+            popupAnchorRef.current = anchorNode
+            updateDownloadPopupPosition()
+            startTransition(() => {
+                setIsDownloadPopupOpen((prev) => !prev)
+            })
+        },
+        [updateDownloadPopupPosition]
+    )
 
     useEffect(() => {
         if (!isDownloadPopupOpen) return
@@ -347,7 +382,7 @@ export default function TimedEllipticalMenu({
             const target = event.target
             const insidePopup = popupRef.current?.contains(target) ?? false
             const insideTrigger =
-                activeLinkRef.current?.contains(target) ?? false
+                popupAnchorRef.current?.contains(target) ?? false
             if (!insidePopup && !insideTrigger) closeDownloadPopup()
         }
 
@@ -445,6 +480,7 @@ export default function TimedEllipticalMenu({
             >
                 CLAUDIA MANGONE
             </div>
+            {isPhone && (
             <a
                 ref={activeLinkRef}
                 href={activeItem.href}
@@ -454,6 +490,7 @@ export default function TimedEllipticalMenu({
                     handleLabelClick()
                     if (activeItem.label === "DOWNLOAD PORTFOLIO") {
                         event.preventDefault()
+                        popupAnchorRef.current = activeLinkRef.current
                         updateDownloadPopupPosition()
                         startTransition(() => {
                             if (downloadIndex >= 0)
@@ -644,6 +681,23 @@ export default function TimedEllipticalMenu({
                     </motion.span>
                 </motion.span>
             </a>
+            )}
+            {!isPhone &&
+                MENU_ITEMS.map((item, index) => (
+                    <DesktopMenuItem
+                        key={item.label}
+                        item={item}
+                        index={index}
+                        totalItems={MENU_ITEMS.length}
+                        textColor={textColor}
+                        markerColor={markerColor}
+                        fontSize={fontSize}
+                        markerWidth={markerWidth}
+                        edgeInset={edgeInset}
+                        canHover={canHover}
+                        onDownloadClick={openDesktopDownloadPopup}
+                    />
+                ))}
             {isDownloadPopupOpen && (
                 <motion.div
                     ref={popupRef}
@@ -712,6 +766,240 @@ export default function TimedEllipticalMenu({
                 </motion.div>
             )}
         </div>
+    )
+}
+
+// --- VOCE DI MENU INDIPENDENTE (SOLO DESKTOP) ---
+// Su desktop tutte le voci del menu sono presenti insieme, ciascuna nella
+// propria posizione dell'ellisse (item.left/item.top), e ognuna ha un
+// proprio ciclo di comparsa/scomparsa ogni 3 secondi, INDIPENDENTE dalle
+// altre: non c'e' piu' una singola voce "attiva" che si sposta - ogni
+// voce vive e si anima per conto suo. Quando il cursore passa sopra una
+// voce, si blocca SOLO il timer di QUELLA voce (resta visibile finche' il
+// cursore non se ne va); le altre continuano il proprio ciclo di 3
+// secondi normalmente.
+const DESKTOP_CYCLE_MS = 3000
+
+function DesktopMenuItem({
+    item,
+    index,
+    totalItems,
+    textColor,
+    markerColor,
+    fontSize,
+    markerWidth,
+    edgeInset,
+    canHover,
+    onDownloadClick,
+}) {
+    const [hasStarted, setHasStarted] = useState(false)
+    const [isVisible, setIsVisible] = useState(false)
+    const [isHovered, setIsHovered] = useState(false)
+    const [twistCount, setTwistCount] = useState(0)
+    // Incrementato ogni volta che la voce ridiventa visibile: usato come
+    // key per far ripartire da capo l'animazione di "srotolamento" delle
+    // lettere ad ogni nuova comparsa (non solo alla prima).
+    const [revealKey, setRevealKey] = useState(0)
+    const anchorRef = useRef(null)
+
+    // Sfalsamento iniziale: la prima accensione di ogni voce e' ritardata
+    // in base al proprio indice, cosi' le 4 voci non compaiono tutte nello
+    // stesso istante al caricamento della pagina (stesso ritmo del vecchio
+    // menu, che le mostrava una alla volta ogni 3s/4 = 750ms).
+    useEffect(() => {
+        if (typeof window === "undefined") return
+        const staggerMs = (DESKTOP_CYCLE_MS / Math.max(1, totalItems)) * index
+        const timeoutId = window.setTimeout(() => {
+            setHasStarted(true)
+            setIsVisible(true)
+        }, staggerMs)
+        return () => window.clearTimeout(timeoutId)
+        // Va eseguito una sola volta al mount della voce.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    // Ciclo continuo comparsa/scomparsa, ogni 3 secondi, dopo l'accensione
+    // iniziale. Si sospende (si "congela" cosi' com'e') finche' il cursore
+    // resta sopra la voce - stessa identica logica gia' usata nel resto
+    // del sito (es. handleLabelHoverEnter/Leave del menu mobile).
+    useEffect(() => {
+        if (!hasStarted) return
+        if (typeof window === "undefined") return
+        if (isHovered) return
+        const timeoutId = window.setTimeout(() => {
+            setIsVisible((prev) => !prev)
+        }, DESKTOP_CYCLE_MS)
+        return () => window.clearTimeout(timeoutId)
+    }, [hasStarted, isVisible, isHovered])
+
+    useEffect(() => {
+        if (isVisible) setRevealKey((prev) => prev + 1)
+    }, [isVisible])
+
+    const handleEnter = useCallback(() => {
+        if (!canHover) return
+        setIsHovered(true)
+        setTwistCount((prev) => prev + 1)
+    }, [canHover])
+
+    const handleLeave = useCallback(() => {
+        if (!canHover) return
+        setIsHovered(false)
+    }, [canHover])
+
+    const isDownloadPortfolio = item.label === "DOWNLOAD PORTFOLIO"
+
+    const handleClick = useCallback(
+        (event) => {
+            setTwistCount((prev) => prev + 1)
+            if (isDownloadPortfolio) {
+                event.preventDefault()
+                onDownloadClick(anchorRef.current)
+            }
+        },
+        [isDownloadPortfolio, onDownloadClick]
+    )
+
+    const isGlowActive = isHovered && canHover
+    const computedFontSize = `${Math.max(18, fontSize)}px`
+
+    return (
+        <motion.a
+            ref={anchorRef}
+            href={item.href}
+            onMouseEnter={handleEnter}
+            onMouseLeave={handleLeave}
+            onClick={handleClick}
+            initial={false}
+            animate={{ opacity: isVisible ? 1 : 0 }}
+            transition={{ duration: 0.45, ease: "easeInOut" }}
+            style={{
+                position: "absolute",
+                zIndex: 2,
+                left: `clamp(${edgeInset}px, ${item.left}, calc(100% - ${edgeInset}px))`,
+                top: `clamp(10px, ${item.top}, calc(100% - 10px))`,
+                transform: "translate(-50%, -50%)",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                textDecoration: "none",
+                color: textColor,
+                textTransform: "uppercase",
+                letterSpacing: "0.7px",
+                whiteSpace: "nowrap",
+                fontSize: computedFontSize,
+                fontFamily: "Inter, Helvetica, Arial, sans-serif",
+                fontWeight: 500,
+                textAlign: "left",
+                perspective: 700,
+                // Finche' e' invisibile non deve intercettare click/hover:
+                // altrimenti una voce "spenta" bloccherebbe il passaggio
+                // del cursore verso quella dietro di lei.
+                pointerEvents: isVisible ? "auto" : "none",
+            }}
+            aria-label={`Open ${item.label}`}
+        >
+            {/* Area cliccabile allargata, come nella versione mobile. */}
+            <span
+                aria-hidden="true"
+                style={{
+                    position: "absolute",
+                    inset: -22,
+                    pointerEvents: isVisible ? "auto" : "none",
+                }}
+            />
+            <motion.span
+                initial={false}
+                animate={{ rotateX: twistCount * 360 }}
+                transition={{ duration: 0.75, ease: "easeInOut" }}
+                style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 10,
+                    transformStyle: "preserve-3d",
+                }}
+            >
+                <motion.span
+                    initial={false}
+                    animate={{
+                        color: isGlowActive ? "#A6FF00" : markerColor,
+                        boxShadow: isGlowActive
+                            ? "0 0 8px rgba(166, 255, 0, 0.55)"
+                            : "0 0 0 rgba(0, 0, 0, 0)",
+                    }}
+                    transition={{ duration: 1.15, ease: "easeInOut" }}
+                    style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        flexShrink: 0,
+                    }}
+                >
+                    <motion.span
+                        key={`star-${revealKey}`}
+                        aria-hidden="true"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: [0, 1.65, 1], opacity: 1 }}
+                        transition={{
+                            duration: 0.45,
+                            ease: "easeOut",
+                            times: [0, 0.65, 1],
+                        }}
+                        style={{
+                            display: "inline-block",
+                            fontSize: Math.max(14, markerWidth),
+                            lineHeight: 1,
+                            transformOrigin: "center",
+                        }}
+                    >
+                        <motion.span
+                            animate={{ scale: [1, 1.28, 1] }}
+                            transition={{
+                                duration: 1.2,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                delay: 0.45,
+                            }}
+                            style={{ display: "inline-block" }}
+                        >
+                            ✦
+                        </motion.span>
+                    </motion.span>
+                </motion.span>
+                <motion.span
+                    initial={false}
+                    animate={{ color: isGlowActive ? "#A6FF00" : textColor }}
+                    transition={{ duration: 1.15, ease: "easeInOut" }}
+                    style={{
+                        display: "inline-flex",
+                        lineHeight: 1.1,
+                        textShadow: isGlowActive
+                            ? "0 0 10px rgba(166, 255, 0, 0.55)"
+                            : "0 0 0 rgba(0, 0, 0, 0)",
+                    }}
+                >
+                    <motion.span
+                        key={`label-${revealKey}`}
+                        style={{ display: "inline-flex" }}
+                    >
+                        {item.label.split("").map((char, charIndex) => (
+                            <motion.span
+                                key={charIndex}
+                                initial={{ opacity: 0, x: -16 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{
+                                    duration: 0.28,
+                                    delay: 0.35 + charIndex * 0.028,
+                                    ease: "easeOut",
+                                }}
+                                style={{ display: "inline-block" }}
+                            >
+                                {char === " " ? "\u00A0" : char}
+                            </motion.span>
+                        ))}
+                    </motion.span>
+                </motion.span>
+            </motion.span>
+        </motion.a>
     )
 }
 
