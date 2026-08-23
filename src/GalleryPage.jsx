@@ -33,6 +33,21 @@ const COLOR_WHITE = "#FFFFFF"
 export default function GalleryPage({ items, centerLabel }) {
     const [activeIndex, setActiveIndex] = useState(0)
     const [isPhone, setIsPhone] = useState(false)
+    // FIX (2): l'asse della galleria (foto uniformi in larghezza + scroll
+    // verso il basso, oppure foto uniformi in altezza + scroll verso
+    // destra) non dipende dal TIPO di dispositivo (telefono/tablet/
+    // desktop) ma dal suo ORIENTAMENTO reale in questo momento. Prima si
+    // usava "isPhone" (soglia di larghezza 768px) anche per decidere
+    // l'asse della galleria: un tablet in verticale (es. iPad 810/834px
+    // di larghezza) supera quasi sempre la soglia 768, quindi veniva
+    // trattato come "desktop orizzontale" pur essendo in verticale,
+    // risultando in foto di altezza fissa ma larghezze diverse tra loro
+    // (il difetto segnalato). Con "isVerticalGallery" (basato su
+    // orientamento reale) qualsiasi dispositivo verticale - telefono O
+    // tablet - ottiene larghezze uniformi e scroll verso il basso, e
+    // qualsiasi dispositivo orizzontale ottiene altezze uniformi e
+    // scroll verso destra, esattamente come richiesto.
+    const [isVerticalGallery, setIsVerticalGallery] = useState(true)
     // Larghezza (in px) della PRIMA foto, misurata a runtime: serve per
     // spostare il paddingLeft dello scroller in modo che sia il CENTRO
     // della prima foto (non il suo bordo sinistro) a coincidere con
@@ -51,12 +66,12 @@ export default function GalleryPage({ items, centerLabel }) {
 
     const gap = isPhone ? 12 : 28
     const horizontalGutter = isPhone ? 16 : 48
-    // Larghezza fissa delle foto SOLO su smartphone: la galleria li'
-    // scorre in verticale (dall'alto verso il basso) invece che in
-    // orizzontale come su desktop, quindi qui e' la larghezza ad essere
-    // fissa (piena larghezza pagina meno i margini laterali) e l'altezza
-    // a seguire liberamente le proporzioni naturali di ogni foto.
-    const photoWidthPhone = `calc(100vw - ${horizontalGutter * 2}px)`
+    // Larghezza fissa delle foto in orientamento VERTICALE (telefono o
+    // tablet): la galleria li' scorre in verticale (dall'alto verso il
+    // basso) invece che in orizzontale, quindi qui e' la larghezza ad
+    // essere fissa (piena larghezza pagina meno i margini laterali) e
+    // l'altezza a seguire liberamente le proporzioni naturali di ogni foto.
+    const photoWidthVertical = `calc(100vw - ${horizontalGutter * 2}px)`
     // Gutter dedicato al footer (CONTACTS): distanza dal bordo destro
     // aumentata di poco rispetto al resto del layout della galleria.
     const footerEdgeGutter = isPhone ? 20 : 56
@@ -84,7 +99,7 @@ export default function GalleryPage({ items, centerLabel }) {
     // sovrapposte a didascalie/footer. Cosi' la foto riempie sempre
     // esattamente la fascia disponibile, mai di piu': niente piu' tagli,
     // niente piu' sovrapposizioni, su nessuno schermo.
-    const galleryHeight = `calc(100vh - ${headerReserved}px - ${bottomReservedHeight}px - ${galleryBottomGapPhone}px)`
+    const galleryHeight = `calc(100dvh - ${headerReserved}px - ${bottomReservedHeight}px - ${galleryBottomGapPhone}px)`
     // Piccolo margine aggiuntivo SOLO per allontanare un po' le didascalie
     // dalle foto, senza toccare bottomReservedHeight (che definisce la
     // fascia della galleria, gia' corretta cosi' com'e').
@@ -112,6 +127,32 @@ export default function GalleryPage({ items, centerLabel }) {
         return () => window.removeEventListener("resize", onResize)
     }, [])
 
+    // Rileva l'orientamento reale (verticale/orizzontale) tramite media
+    // query, cosi' reagisce anche alla rotazione di telefono/tablet senza
+    // aspettare un resize della finestra (su alcuni dispositivi la
+    // rotazione non genera un evento "resize" affidabile, mentre la
+    // media query "orientation" scatta sempre).
+    useEffect(() => {
+        if (
+            typeof window === "undefined" ||
+            typeof window.matchMedia === "undefined"
+        )
+            return
+        const mediaQuery = window.matchMedia("(orientation: portrait)")
+        const update = () => {
+            startTransition(() => {
+                setIsVerticalGallery(mediaQuery.matches)
+            })
+        }
+        update()
+        mediaQuery.addEventListener("change", update)
+        window.addEventListener("resize", update)
+        return () => {
+            mediaQuery.removeEventListener("change", update)
+            window.removeEventListener("resize", update)
+        }
+    }, [])
+
     const measureFirstImage = useCallback(() => {
         if (!firstImageRef.current) return
         const width = firstImageRef.current.getBoundingClientRect().width
@@ -135,11 +176,11 @@ export default function GalleryPage({ items, centerLabel }) {
         if (typeof window === "undefined") return
         if (!scrollerRef.current) return
         const scrollerRect = scrollerRef.current.getBoundingClientRect()
-        // Su desktop la galleria scorre in orizzontale, quindi l'elemento
-        // "attivo" e' quello piu' vicino al centro orizzontale dello
-        // scroller. Su smartphone scorre in verticale: stessa logica, ma
-        // sull'asse Y invece che X.
-        const scrollerCenter = isPhone
+        // In orientamento orizzontale la galleria scorre in orizzontale,
+        // quindi l'elemento "attivo" e' quello piu' vicino al centro
+        // orizzontale dello scroller. In verticale scorre in verticale:
+        // stessa logica, ma sull'asse Y invece che X.
+        const scrollerCenter = isVerticalGallery
             ? scrollerRect.top + scrollerRect.height / 2
             : scrollerRect.left + scrollerRect.width / 2
 
@@ -148,7 +189,7 @@ export default function GalleryPage({ items, centerLabel }) {
         itemRefs.current.forEach((node, index) => {
             if (!node) return
             const rect = node.getBoundingClientRect()
-            const itemCenter = isPhone
+            const itemCenter = isVerticalGallery
                 ? rect.top + rect.height / 2
                 : rect.left + rect.width / 2
             const distance = Math.abs(scrollerCenter - itemCenter)
@@ -161,7 +202,7 @@ export default function GalleryPage({ items, centerLabel }) {
         startTransition(() => {
             setActiveIndex(closestIndex)
         })
-    }, [isPhone])
+    }, [isVerticalGallery])
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -186,52 +227,52 @@ export default function GalleryPage({ items, centerLabel }) {
 
     const onWheel = useCallback(
         (event) => {
-            // Su smartphone la galleria scorre in verticale: la rotellina
+            // In verticale la galleria scorre in verticale: la rotellina
             // (o il gesto touch) deve scorrere nativamente come farebbe
             // qualsiasi altro elemento con overflow-y, quindi qui non
             // c'e' nulla da redirigere.
-            if (isPhone) return
+            if (isVerticalGallery) return
             if (!scrollerRef.current) return
             scrollerRef.current.scrollLeft += event.deltaY + event.deltaX
         },
-        [isPhone]
+        [isVerticalGallery]
     )
 
     const onPointerDown = useCallback(
         (event) => {
-            // Su smartphone lo scorrimento verticale e' nativo (nessuna
-            // simulazione di drag da fare, a differenza del trascinamento
-            // orizzontale su desktop che serve per emulare lo scroll con
-            // mouse/trackpad su un asse che il browser non gestisce da solo).
-            if (isPhone) return
+            // In verticale lo scorrimento e' nativo (nessuna simulazione
+            // di drag da fare, a differenza del trascinamento orizzontale
+            // che serve per emulare lo scroll con mouse/trackpad su un
+            // asse che il browser non gestisce da solo).
+            if (isVerticalGallery) return
             if (!scrollerRef.current) return
             dragStateRef.current.dragging = true
             dragStateRef.current.startX = event.clientX
             dragStateRef.current.startScrollLeft = scrollerRef.current.scrollLeft
             scrollerRef.current.setPointerCapture(event.pointerId)
         },
-        [isPhone]
+        [isVerticalGallery]
     )
 
     const onPointerMove = useCallback(
         (event) => {
-            if (isPhone) return
+            if (isVerticalGallery) return
             if (!scrollerRef.current || !dragStateRef.current.dragging) return
             const delta = event.clientX - dragStateRef.current.startX
             scrollerRef.current.scrollLeft =
                 dragStateRef.current.startScrollLeft - delta
         },
-        [isPhone]
+        [isVerticalGallery]
     )
 
     const onPointerUp = useCallback(
         (event) => {
-            if (isPhone) return
+            if (isVerticalGallery) return
             if (!scrollerRef.current) return
             dragStateRef.current.dragging = false
             scrollerRef.current.releasePointerCapture(event.pointerId)
         },
-        [isPhone]
+        [isVerticalGallery]
     )
 
     const activeItem = useMemo(
@@ -256,7 +297,18 @@ export default function GalleryPage({ items, centerLabel }) {
             style={{
                 position: "relative",
                 width: "100%",
-                height: "100vh",
+                // FIX (1): "100vh" su mobile viene calcolato in base
+                // all'altezza "grande" del viewport (barra degli
+                // indirizzi nascosta), che puo' essere PIU' alta dello
+                // spazio davvero visibile quando la barra e' mostrata. Con
+                // "overflow: hidden" e la didascalia posizionata in base a
+                // questa altezza, il risultato e' che su alcuni telefoni
+                // la didascalia finisce sotto al bordo inferiore
+                // realmente visibile, invisibile. "100dvh" (dynamic
+                // viewport height) si aggiorna invece in base allo spazio
+                // VISIBILE reale in ogni momento, quindi la didascalia
+                // resta sempre dentro lo schermo.
+                height: "100dvh",
                 background: COLOR_WHITE,
                 overflow: "hidden",
                 color: COLOR_BLACK,
@@ -281,7 +333,7 @@ export default function GalleryPage({ items, centerLabel }) {
                     top: headerReserved,
                     left: 0,
                     right: 0,
-                    height: `calc(100vh - ${headerReserved}px - ${bottomReservedHeight}px - ${galleryBottomGapPhone}px)`,
+                    height: `calc(100dvh - ${headerReserved}px - ${bottomReservedHeight}px - ${galleryBottomGapPhone}px)`,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
@@ -293,58 +345,61 @@ export default function GalleryPage({ items, centerLabel }) {
                 <div
                     ref={scrollerRef}
                     onWheel={onWheel}
-                    onPointerDown={isPhone ? undefined : onPointerDown}
-                    onPointerMove={isPhone ? undefined : onPointerMove}
-                    onPointerUp={isPhone ? undefined : onPointerUp}
-                    onPointerCancel={isPhone ? undefined : onPointerUp}
+                    onPointerDown={isVerticalGallery ? undefined : onPointerDown}
+                    onPointerMove={isVerticalGallery ? undefined : onPointerMove}
+                    onPointerUp={isVerticalGallery ? undefined : onPointerUp}
+                    onPointerCancel={isVerticalGallery ? undefined : onPointerUp}
                     style={{
                         width: "100%",
                         height: "100%",
-                        // Su desktop scorre in orizzontale (overflow-x),
-                        // su smartphone in verticale (overflow-y) - questa
+                        // In orizzontale scorre in orizzontale (overflow-x),
+                        // in verticale in verticale (overflow-y) - questa
                         // e' la differenza chiave richiesta: altezza fissa
-                        // + scorrimento a destra su desktop, larghezza
-                        // fissa + scorrimento in basso su smartphone.
-                        overflowX: isPhone ? "hidden" : "auto",
-                        overflowY: isPhone ? "auto" : "hidden",
+                        // + scorrimento a destra in orizzontale, larghezza
+                        // fissa + scorrimento in basso in verticale -
+                        // indipendentemente dal fatto che il dispositivo
+                        // sia un telefono o un tablet.
+                        overflowX: isVerticalGallery ? "hidden" : "auto",
+                        overflowY: isVerticalGallery ? "auto" : "hidden",
                         scrollbarWidth: "none",
                         msOverflowStyle: "none",
-                        touchAction: isPhone ? "pan-y" : "pan-x",
-                        cursor: isPhone
+                        touchAction: isVerticalGallery ? "pan-y" : "pan-x",
+                        cursor: isVerticalGallery
                             ? "default"
                             : dragStateRef.current.dragging
                               ? "grabbing"
                               : "grab",
-                        // Su desktop, a riposo (scrollLeft 0), non e' il
+                        // In orizzontale, a riposo (scrollLeft 0), non e' il
                         // BORDO sinistro della prima foto a partire dal
                         // centro della pagina: e' il suo ASSE VERTICALE
                         // (centro) a coincidere esattamente con l'asse che
                         // divide la pagina in due (50vw) - da qui il
-                        // paddingLeft calcolato. Su smartphone (scroll
-                        // verticale, foto a piena larghezza) questo trucco
-                        // non serve: basta il gutter laterale standard.
-                        paddingLeft: isPhone
+                        // paddingLeft calcolato. In verticale (scroll
+                        // verticale, foto a larghezza uniforme) questo
+                        // trucco non serve: basta il gutter laterale
+                        // standard.
+                        paddingLeft: isVerticalGallery
                             ? horizontalGutter
                             : `calc(50vw - ${firstImageHalfWidth}px)`,
                         paddingRight: horizontalGutter,
-                        paddingTop: isPhone ? gap : 0,
+                        paddingTop: isVerticalGallery ? gap : 0,
                         boxSizing: "border-box",
                     }}
                 >
                     <div
                         style={{
-                            display: isPhone ? "flex" : "inline-flex",
-                            flexDirection: isPhone ? "column" : "row",
+                            display: isVerticalGallery ? "flex" : "inline-flex",
+                            flexDirection: isVerticalGallery ? "column" : "row",
                             alignItems: "center",
                             gap,
-                            minHeight: isPhone ? "auto" : galleryHeight,
-                            width: isPhone ? "100%" : "auto",
-                            // Spazio finale: su desktop a destra (permette
+                            minHeight: isVerticalGallery ? "auto" : galleryHeight,
+                            width: isVerticalGallery ? "100%" : "auto",
+                            // Spazio finale: in orizzontale a destra (permette
                             // di scorrere l'ultima foto fino al centro),
-                            // su smartphone in basso (stesso scopo, sul
+                            // in verticale in basso (stesso scopo, sul
                             // nuovo asse verticale).
-                            paddingRight: isPhone ? 0 : "35vw",
-                            paddingBottom: isPhone ? "20vh" : 0,
+                            paddingRight: isVerticalGallery ? 0 : "35vw",
+                            paddingBottom: isVerticalGallery ? "20dvh" : 0,
                         }}
                     >
                         {items.map((item, index) => (
@@ -354,15 +409,22 @@ export default function GalleryPage({ items, centerLabel }) {
                                     itemRefs.current[index] = node
                                 }}
                                 style={{
-                                    height: isPhone ? "auto" : galleryHeight,
-                                    // Su desktop niente larghezza fissa (la
-                                    // larghezza segue l'altezza fissa e le
-                                    // proporzioni naturali). Su smartphone
-                                    // e' l'opposto: larghezza fissa, altezza
-                                    // libera - cosi' le proporzioni restano
-                                    // comunque rispettate, solo sull'asse
-                                    // opposto.
-                                    width: isPhone ? photoWidthPhone : "auto",
+                                    height: isVerticalGallery ? "auto" : galleryHeight,
+                                    // In orizzontale niente larghezza fissa
+                                    // (la larghezza segue l'altezza fissa e
+                                    // le proporzioni naturali: tutte le foto
+                                    // hanno cosi' la STESSA altezza). In
+                                    // verticale e' l'opposto: larghezza
+                                    // fissa (tutte le foto hanno la STESSA
+                                    // larghezza), altezza libera - cosi' le
+                                    // proporzioni restano comunque
+                                    // rispettate, solo sull'asse opposto.
+                                    // Questo e' cio' che uniforma le foto
+                                    // di formati diversi su tablet, in
+                                    // entrambi gli orientamenti.
+                                    width: isVerticalGallery
+                                        ? photoWidthVertical
+                                        : "auto",
                                     flex: "0 0 auto",
                                 }}
                             >
@@ -377,18 +439,22 @@ export default function GalleryPage({ items, centerLabel }) {
                                     alt={item.title}
                                     draggable={false}
                                     style={{
-                                        height: isPhone ? "auto" : "100%",
-                                        width: isPhone ? "100%" : "auto",
-                                        // Su desktop limite di LARGHEZZA per
-                                        // le foto molto panoramiche; su
-                                        // smartphone limite di ALTEZZA per
+                                        height: isVerticalGallery ? "auto" : "100%",
+                                        width: isVerticalGallery ? "100%" : "auto",
+                                        // In orizzontale limite di LARGHEZZA
+                                        // per le foto molto panoramiche; in
+                                        // verticale limite di ALTEZZA per
                                         // quelle molto verticali - in
                                         // entrambi i casi objectFit
                                         // "contain" garantisce che l'intera
                                         // immagine resti visibile, senza
                                         // mai essere tagliata.
-                                        maxWidth: isPhone ? "none" : "58.8vw",
-                                        maxHeight: isPhone ? "70vh" : "none",
+                                        maxWidth: isVerticalGallery
+                                            ? "none"
+                                            : "58.8vw",
+                                        maxHeight: isVerticalGallery
+                                            ? "70dvh"
+                                            : "none",
                                         objectFit: "contain",
                                         userSelect: "none",
                                         display: "block",
@@ -421,7 +487,16 @@ export default function GalleryPage({ items, centerLabel }) {
                     // che da meta' pagina, dove su schermi stretti
                     // lascerebbero troppo poco spazio al testo.
                     left: isPhone ? horizontalGutter : "50vw",
-                    top: `calc(100vh - ${bottomReservedHeight}px + ${captionsExtraGap}px - ${captionsPhoneLift}px)`,
+                    // FIX (1): calcolato su "100dvh" (altezza dinamica del
+                    // viewport, cioe' lo spazio DAVVERO visibile in ogni
+                    // istante) invece di "100vh" (che su molti browser
+                    // mobile resta ancorato all'altezza "grande", con
+                    // barra degli indirizzi nascosta). Con "100vh" la
+                    // didascalia poteva finire posizionata oltre il bordo
+                    // inferiore realmente visibile - e quindi invisibile -
+                    // proprio sui telefoni dove la barra degli indirizzi
+                    // resta mostrata piu' a lungo.
+                    top: `calc(100dvh - ${bottomReservedHeight}px + ${captionsExtraGap}px - ${captionsPhoneLift}px)`,
                     width: isPhone
                         ? `calc(100vw - ${horizontalGutter * 2}px)`
                         : `calc(50vw - ${horizontalGutter}px)`,
