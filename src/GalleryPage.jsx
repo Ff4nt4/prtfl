@@ -449,19 +449,28 @@ export default function GalleryPage({ items, centerLabel }) {
                                         height: isVerticalGallery ? "auto" : "100%",
                                         width: isVerticalGallery ? "100%" : "auto",
                                         // In orizzontale limite di LARGHEZZA
-                                        // per le foto molto panoramiche; in
-                                        // verticale limite di ALTEZZA per
-                                        // quelle molto verticali - in
-                                        // entrambi i casi objectFit
-                                        // "contain" garantisce che l'intera
-                                        // immagine resti visibile, senza
-                                        // mai essere tagliata.
+                                        // per le foto molto panoramiche,
+                                        // senza toccare l'altezza (fissa).
+                                        // In verticale NESSUN limite di
+                                        // altezza: un "maxHeight" qui, con
+                                        // width:100% e height:auto, e' la
+                                        // causa esatta del bug "larghezze
+                                        // non uniformi" segnalato - quando
+                                        // una foto molto verticale supera
+                                        // il limite, il browser NON taglia
+                                        // l'altezza ma ricalcola (riduce) la
+                                        // larghezza per mantenere le
+                                        // proporzioni, rompendo l'uniformita'
+                                        // con le altre foto. Senza il
+                                        // limite, la larghezza resta SEMPRE
+                                        // quella del contenitore (fissa) e
+                                        // solo l'altezza segue liberamente
+                                        // le proporzioni naturali di ogni
+                                        // foto - esattamente come richiesto.
                                         maxWidth: isVerticalGallery
                                             ? "none"
                                             : "58.8vw",
-                                        maxHeight: isVerticalGallery
-                                            ? "70dvh"
-                                            : "none",
+                                        maxHeight: "none",
                                         objectFit: "contain",
                                         userSelect: "none",
                                         display: "block",
