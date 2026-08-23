@@ -167,10 +167,17 @@ export default function GalleryPage({ items, centerLabel }) {
         window.addEventListener("resize", measureFirstImage)
         return () => window.removeEventListener("resize", measureFirstImage)
         // Rimisura anche quando cambia l'altezza della galleria (es. da
-        // desktop a mobile), perche' a parita' di proporzioni la larghezza
-        // renderizzata cambia insieme all'altezza. Anche quando cambia
-        // l'array items (pagina diversa), la prima immagine e' diversa.
-    }, [measureFirstImage, galleryHeight, items])
+        // desktop a mobile) o l'ORIENTAMENTO (isVerticalGallery): quando si
+        // ruota un tablet, l'immagine passa da "larghezza fissa/altezza
+        // libera" (verticale) a "altezza fissa/larghezza libera"
+        // (orizzontale, o viceversa). L'evento nativo "resize" del
+        // browser puo' scattare PRIMA che React aggiorni lo stile
+        // dell'immagine al nuovo orientamento, misurando quindi la
+        // larghezza VECCHIA e disallineando l'asse della prima foto dal
+        // centro pagina. Dipendendo esplicitamente da "isVerticalGallery",
+        // l'effetto rimisura DOPO che React ha gia' applicato il nuovo
+        // layout, garantendo sempre una misura corretta e aggiornata.
+    }, [measureFirstImage, galleryHeight, items, isVerticalGallery])
 
     const updateCenteredItem = useCallback(() => {
         if (typeof window === "undefined") return
@@ -482,11 +489,14 @@ export default function GalleryPage({ items, centerLabel }) {
             <div
                 style={{
                     position: "fixed",
-                    // Su smartphone le didascalie partono dal margine
-                    // sinistro (come il resto del layout mobile) invece
-                    // che da meta' pagina, dove su schermi stretti
-                    // lascerebbero troppo poco spazio al testo.
-                    left: isPhone ? horizontalGutter : "50vw",
+                    // Ancorate al margine sinistro in ORIENTAMENTO VERTICALE
+                    // (telefono O tablet: le foto occupano gia' quasi tutta
+                    // la larghezza pagina in questa modalita', quindi il
+                    // vecchio ancoraggio a meta' pagina lascerebbe troppo
+                    // poco spazio al testo su tablet) invece che da meta'
+                    // pagina, riservata all'orientamento orizzontale dove
+                    // le foto occupano solo la meta' sinistra dello schermo.
+                    left: isVerticalGallery ? horizontalGutter : "50vw",
                     // FIX (1): calcolato su "100dvh" (altezza dinamica del
                     // viewport, cioe' lo spazio DAVVERO visibile in ogni
                     // istante) invece di "100vh" (che su molti browser
@@ -497,7 +507,7 @@ export default function GalleryPage({ items, centerLabel }) {
                     // proprio sui telefoni dove la barra degli indirizzi
                     // resta mostrata piu' a lungo.
                     top: `calc(100dvh - ${bottomReservedHeight}px + ${captionsExtraGap}px - ${captionsPhoneLift}px)`,
-                    width: isPhone
+                    width: isVerticalGallery
                         ? `calc(100vw - ${horizontalGutter * 2}px)`
                         : `calc(50vw - ${horizontalGutter}px)`,
                     boxSizing: "border-box",
