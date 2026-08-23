@@ -65,25 +65,19 @@ export default function TimedEllipticalMenu({
     fontSize = 15,
     markerWidth = 14,
 }) {
-    const [activeIndex, setActiveIndex] = useState(0)
     const [activeVideoIndex, setActiveVideoIndex] = useState(0)
     const [viewportWidth, setViewportWidth] = useState(1440)
     const [canHover, setCanHover] = useState(false)
-    const [twistCount, setTwistCount] = useState(0)
-    const [isLabelHovered, setIsLabelHovered] = useState(false)
     const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
     const [downloadPopupPosition, setDownloadPopupPosition] = useState({
         left: 16,
         top: 16,
     })
     const containerRef = useRef(null)
-    const activeLinkRef = useRef(null)
     // Riferimento GENERICO all'elemento che ha aperto il popup di download:
-    // su smartphone e' sempre activeLinkRef (l'unica voce mostrata), su
-    // desktop e' invece il nodo della specifica voce "DOWNLOAD PORTFOLIO"
-    // cliccata (ogni voce ora vive per conto suo - vedi DesktopMenuItem).
-    // Usato per posizionare/richiudere il popup senza dover distinguere
-    // i due casi in ogni punto del codice.
+    // e' il nodo della specifica voce "DOWNLOAD PORTFOLIO" cliccata (ogni
+    // voce vive per conto sua, su ogni dispositivo - vedi EllipticalMenuItem
+    // piu' in basso). Usato per posizionare/richiudere il popup.
     const popupAnchorRef = useRef(null)
     const popupRef = useRef(null)
     const videoRef = useRef(null)
@@ -93,31 +87,15 @@ export default function TimedEllipticalMenu({
     const isInView = useInView(containerRef, { amount: 0.2 })
     void durationSeconds
 
-    const advance = useCallback(() => {
-        startTransition(() => {
-            setActiveIndex((prev) => (prev + 1) % MENU_ITEMS.length)
-        })
-    }, [])
-
     const advanceVideo = useCallback(() => {
         startTransition(() => {
             setActiveVideoIndex((prev) => (prev + 1) % VIDEO_PLAYLIST.length)
         })
     }, [])
 
-    const activeItem = useMemo(() => MENU_ITEMS[activeIndex], [activeIndex])
-    const downloadIndex = useMemo(
-        () =>
-            MENU_ITEMS.findIndex((item) => item.label === "DOWNLOAD PORTFOLIO"),
-        []
-    )
     const activeVideoSrc = useMemo(
         () => VIDEO_PLAYLIST[activeVideoIndex],
         [activeVideoIndex]
-    )
-    const isDownloadPortfolio = useMemo(
-        () => activeItem.label === "DOWNLOAD PORTFOLIO",
-        [activeItem.label]
     )
     // Non serve piu' per l'overshoot di larghezza del vecchio rettangolo
     // (il "boing" e' stato rimosso): resta come margine di sicurezza per
@@ -141,7 +119,7 @@ export default function TimedEllipticalMenu({
     // Su smartphone lo sfondo e' il video verticale dedicato (mobile.mp4),
     // fisso (nessun ciclo tra "reel"). Su desktop/tablet resta il
     // comportamento originale: ciclo tra selected-works.mp4 ed
-    // exhibitions.mp4, sincronizzato con la voce di menu attiva.
+    // exhibitions.mp4.
     const effectiveVideoSrc = isPhone ? mobileVideo : activeVideoSrc
     const horizontalGutter = isPhone ? 16 : edgeInset
     const phoneMaxLabelWidth = useMemo(
@@ -149,17 +127,6 @@ export default function TimedEllipticalMenu({
             Math.max(160, Math.min(260, viewportWidth - horizontalGutter * 2)),
         [horizontalGutter, viewportWidth]
     )
-    const safeLeft = useMemo(() => {
-        if (!isPhone)
-            return `clamp(${edgeInset}px, ${activeItem.left}, calc(100% - ${edgeInset}px))`
-        return `clamp(${horizontalGutter}px, ${activeItem.left}, calc(100% - ${horizontalGutter + phoneMaxLabelWidth}px))`
-    }, [
-        activeItem.left,
-        edgeInset,
-        horizontalGutter,
-        isPhone,
-        phoneMaxLabelWidth,
-    ])
     // Il limite minimo del clamp non deve mai scendere sotto i 18px,
     // nemmeno su schermi molto stretti: prima poteva restringersi fino
     // a "fontSize * 0.8", ora il pavimento e' sempre 18px.
@@ -167,37 +134,6 @@ export default function TimedEllipticalMenu({
         if (!isPhone) return `${Math.max(18, fontSize)}px`
         return `clamp(${Math.max(18, fontSize * 0.8)}px, ${Math.max(3.2, fontSize * 0.9)}vw, ${Math.max(18, fontSize)}px)`
     }, [fontSize, isPhone])
-    const activeDurationMs = 3000
-
-    useEffect(() => {
-        // Su desktop questo timer non serve piu': ogni voce gestisce da
-        // sola il proprio ciclo indipendente di comparsa/scomparsa (vedi
-        // DesktopMenuItem piu' in basso). Resta attivo solo su smartphone,
-        // dove il menu mostra ancora UNA voce alla volta che ruota tra le
-        // posizioni dell'ellisse.
-        if (!isPhone) return
-        if (!isInView) return
-        if (typeof window === "undefined") return
-        if (isDownloadPopupOpen) return
-        // Il timer resta sospeso finche' il cursore e' sopra la voce
-        // attiva (isLabelHovered, gia' aggiornato da
-        // handleLabelHoverEnter/Leave qui sotto, e attivo solo su
-        // dispositivi con hover vero - canHover). Appena il cursore si
-        // sposta via, isLabelHovered torna false: questo effect riparte
-        // e la voce resta visibile per i pieni 3 secondi successivi,
-        // cosi' c'e' sempre tempo comodo per cliccare.
-        if (isLabelHovered) return
-        const timeoutId = window.setTimeout(advance, activeDurationMs)
-        return () => window.clearTimeout(timeoutId)
-    }, [
-        activeDurationMs,
-        activeIndex,
-        advance,
-        isDownloadPopupOpen,
-        isInView,
-        isLabelHovered,
-        isPhone,
-    ])
 
     useEffect(() => {
         if (typeof window === "undefined") return
@@ -292,30 +228,6 @@ export default function TimedEllipticalMenu({
         }
     }, [])
 
-    // Hover: cambia il colore E fa ruotare l'etichetta sul proprio asse.
-    const handleLabelHoverEnter = useCallback(() => {
-        if (!canHover) return
-        startTransition(() => {
-            setIsLabelHovered(true)
-            setTwistCount((prev) => prev + 1)
-        })
-    }, [canHover])
-
-    const handleLabelHoverLeave = useCallback(() => {
-        if (!canHover) return
-        startTransition(() => {
-            setIsLabelHovered(false)
-        })
-    }, [canHover])
-
-    // Click: fa ruotare l'etichetta sul proprio asse (funziona anche su touch,
-    // per questo non è vincolato a canHover).
-    const handleLabelClick = useCallback(() => {
-        startTransition(() => {
-            setTwistCount((prev) => prev + 1)
-        })
-    }, [])
-
     const closeDownloadPopup = useCallback(() => {
         startTransition(() => {
             setIsDownloadPopupOpen(false)
@@ -344,11 +256,11 @@ export default function TimedEllipticalMenu({
         })
     }, [])
 
-    // Apertura del popup di download da una voce del menu DESKTOP (dove
-    // ogni voce vive per conto suo, quindi non esiste piu' un unico
-    // "activeLinkRef"): riceve direttamente il nodo DOM della voce
-    // cliccata, lo salva come ancora generica e apre/chiude il popup.
-    const openDesktopDownloadPopup = useCallback(
+    // Apertura del popup di download da una voce del menu (ogni voce vive
+    // per conto sua, su ogni dispositivo, quindi non esiste piu' un unico
+    // "link attivo" condiviso): riceve direttamente il nodo DOM della
+    // voce cliccata, lo salva come ancora generica e apre/chiude il popup.
+    const openDownloadPopup = useCallback(
         (anchorNode) => {
             popupAnchorRef.current = anchorNode
             updateDownloadPopupPosition()
@@ -480,224 +392,24 @@ export default function TimedEllipticalMenu({
             >
                 CLAUDIA MANGONE
             </div>
-            {isPhone && (
-            <a
-                ref={activeLinkRef}
-                href={activeItem.href}
-                onMouseEnter={handleLabelHoverEnter}
-                onMouseLeave={handleLabelHoverLeave}
-                onClick={(event) => {
-                    handleLabelClick()
-                    if (activeItem.label === "DOWNLOAD PORTFOLIO") {
-                        event.preventDefault()
-                        popupAnchorRef.current = activeLinkRef.current
-                        updateDownloadPopupPosition()
-                        startTransition(() => {
-                            if (downloadIndex >= 0)
-                                setActiveIndex(downloadIndex)
-                            setIsDownloadPopupOpen((prev) => !prev)
-                        })
-                    }
-                }}
-                style={{
-                    position: "absolute",
-                    zIndex: 2,
-                    left: safeLeft,
-                    top: `clamp(10px, ${activeItem.top}, calc(100% - 10px))`,
-                    transform: isPhone
-                        ? "translate(0%, -50%)"
-                        : "translate(-50%, -50%)",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 10,
-                    textDecoration: "none",
-                    color: textColor,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.7px",
-                    whiteSpace:
-                        isPhone && isDownloadPortfolio ? "normal" : "nowrap",
-                    width:
-                        isPhone && isDownloadPortfolio
-                            ? `${phoneMaxLabelWidth}px`
-                            : "auto",
-                    maxWidth: isPhone ? `${phoneMaxLabelWidth}px` : "none",
-                    minWidth: isPhone ? "0" : "max-content",
-                    fontSize: computedFontSize,
-                    fontFamily: "Inter, Helvetica, Arial, sans-serif",
-                    fontWeight: 500,
-                    textAlign:
-                        isPhone && isDownloadPortfolio ? "center" : "left",
-                    // Necessario perche' il rotateX del blocco marker+testo
-                    // (vedi sotto) risulti un vero giro 3D e non un
-                    // semplice schiacciamento verticale piatto.
-                    perspective: 700,
-                }}
-                aria-label={`Open ${activeItem.label}`}
-            >
-                {/* Area cliccabile allargata: elemento invisibile che si
-                    estende oltre i bordi visibili del link (grazie a
-                    "position: absolute" + inset negativo, con l'<a> come
-                    riferimento di posizionamento). Essendo un discendente
-                    dell'<a>, ci si puo' cliccare/passarci sopra col
-                    cursore normalmente (l'evento risale comunque all'<a>)
-                    - ma NON sposta ne' ridimensiona il testo visibile,
-                    che resta esattamente dove/come prima: il centraggio
-                    (transform: translate(-50%,-50%) sull'<a>) si basa
-                    sulla sua box di contenuto normale, che un figlio
-                    assoluto in overflow non altera. */}
-                <span
-                    aria-hidden="true"
-                    style={{
-                        position: "absolute",
-                        inset: -22,
-                        pointerEvents: "auto",
-                    }}
+            {MENU_ITEMS.map((item, index) => (
+                <EllipticalMenuItem
+                    key={item.label}
+                    item={item}
+                    index={index}
+                    totalItems={MENU_ITEMS.length}
+                    textColor={textColor}
+                    markerColor={markerColor}
+                    markerWidth={markerWidth}
+                    edgeInset={edgeInset}
+                    canHover={canHover}
+                    isPhone={isPhone}
+                    horizontalGutter={horizontalGutter}
+                    phoneMaxLabelWidth={phoneMaxLabelWidth}
+                    computedFontSize={computedFontSize}
+                    onDownloadClick={openDownloadPopup}
                 />
-                {/* Marker (stellina ✦) + testo (diviso lettera per lettera)
-                    ruotano INSIEME al click, attorno all'asse orizzontale
-                    (rotateX) - questo e' l'effetto "si avvitano su se
-                    stesse" al click.
-                    IMPORTANTE: niente piu' key={twistCount} qui. Con la key
-                    l'intero blocco (stellina + lettere) verrebbe SMONTATO e
-                    RIMONTATO ad ogni click, facendo ripartire anche
-                    l'animazione di comparsa qui sotto - che invece deve
-                    animarsi SOLO quando cambia la voce attiva (key su
-                    activeIndex, sia sulla stellina sia sul wrapper delle
-                    lettere), non ad ogni click. Usando un valore di
-                    rotazione cumulativo (twistCount * 360) invece della
-                    key, il blocco resta montato: il click continua a farlo
-                    girare su se stesso, ma stellina/lettere sotto non
-                    vengono piu' "risvegliati" a torto. */}
-                <motion.span
-                    initial={false}
-                    animate={{ rotateX: twistCount * 360 }}
-                    transition={{ duration: 0.75, ease: "easeInOut" }}
-                    style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 10,
-                        transformStyle: "preserve-3d",
-                    }}
-                >
-                    <motion.span
-                        initial={false}
-                        animate={{
-                            color:
-                                isLabelHovered && canHover
-                                    ? "#A6FF00"
-                                    : markerColor,
-                            boxShadow:
-                                isLabelHovered && canHover
-                                    ? "0 0 8px rgba(166, 255, 0, 0.55)"
-                                    : "0 0 0 rgba(0, 0, 0, 0)",
-                        }}
-                        transition={{ duration: 1.15, ease: "easeInOut" }}
-                        style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            flexShrink: 0,
-                        }}
-                    >
-                        {/* STELLINA: nessun braccio/coda. Alla comparsa si
-                            INGRANDISCE (overshoot oltre la dimensione finale)
-                            e poi, finche' resta la voce attiva, PULSA in
-                            loop (nessuna rotazione). */}
-                        <motion.span
-                            key={`star-${activeIndex}`}
-                            aria-hidden="true"
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: [0, 1.65, 1], opacity: 1 }}
-                            transition={{
-                                duration: 0.45,
-                                ease: "easeOut",
-                                times: [0, 0.65, 1],
-                            }}
-                            style={{
-                                display: "inline-block",
-                                fontSize: Math.max(14, markerWidth),
-                                lineHeight: 1,
-                                transformOrigin: "center",
-                            }}
-                        >
-                            <motion.span
-                                animate={{ scale: [1, 1.28, 1] }}
-                                transition={{
-                                    duration: 1.2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                    delay: 0.45,
-                                }}
-                                style={{ display: "inline-block" }}
-                            >
-                                ✦
-                            </motion.span>
-                        </motion.span>
-                    </motion.span>
-                    {/* TESTO: effetto "srotolamento" - ogni lettera scivola
-                        verso destra dalla propria posizione decentrata fino
-                        al punto naturale, in sequenza (piccolo delay
-                        crescente lettera per lettera). Il colore hover
-                        resta sull'involucro esterno cosi' tutte le lettere
-                        lo ereditano insieme, senza interferire con lo
-                        stagger dell'entrata. */}
-                    <motion.span
-                        initial={false}
-                        animate={{
-                            color:
-                                isLabelHovered && canHover
-                                    ? "#A6FF00"
-                                    : textColor,
-                        }}
-                        transition={{ duration: 1.15, ease: "easeInOut" }}
-                        style={{
-                            display: "inline-flex",
-                            lineHeight: 1.1,
-                            textShadow:
-                                isLabelHovered && canHover
-                                    ? "0 0 10px rgba(166, 255, 0, 0.55)"
-                                    : "0 0 0 rgba(0, 0, 0, 0)",
-                        }}
-                    >
-                        <motion.span
-                            key={`label-${activeIndex}`}
-                            style={{ display: "inline-flex" }}
-                        >
-                            {activeItem.label.split("").map((char, charIndex) => (
-                                <motion.span
-                                    key={charIndex}
-                                    initial={{ opacity: 0, x: -16 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{
-                                        duration: 0.28,
-                                        delay: 0.35 + charIndex * 0.028,
-                                        ease: "easeOut",
-                                    }}
-                                    style={{ display: "inline-block" }}
-                                >
-                                    {char === " " ? "\u00A0" : char}
-                                </motion.span>
-                            ))}
-                        </motion.span>
-                    </motion.span>
-                </motion.span>
-            </a>
-            )}
-            {!isPhone &&
-                MENU_ITEMS.map((item, index) => (
-                    <DesktopMenuItem
-                        key={item.label}
-                        item={item}
-                        index={index}
-                        totalItems={MENU_ITEMS.length}
-                        textColor={textColor}
-                        markerColor={markerColor}
-                        fontSize={fontSize}
-                        markerWidth={markerWidth}
-                        edgeInset={edgeInset}
-                        canHover={canHover}
-                        onDownloadClick={openDesktopDownloadPopup}
-                    />
-                ))}
+            ))}
             {isDownloadPopupOpen && (
                 <motion.div
                     ref={popupRef}
@@ -769,27 +481,33 @@ export default function TimedEllipticalMenu({
     )
 }
 
-// --- VOCE DI MENU INDIPENDENTE (SOLO DESKTOP) ---
-// Su desktop tutte le voci del menu sono presenti insieme, ciascuna nella
-// propria posizione dell'ellisse (item.left/item.top), e ognuna ha un
-// proprio ciclo di comparsa/scomparsa ogni 3 secondi, INDIPENDENTE dalle
-// altre: non c'e' piu' una singola voce "attiva" che si sposta - ogni
-// voce vive e si anima per conto suo. Quando il cursore passa sopra una
-// voce, si blocca SOLO il timer di QUELLA voce (resta visibile finche' il
-// cursore non se ne va); le altre continuano il proprio ciclo di 3
-// secondi normalmente.
+// --- VOCE DI MENU INDIPENDENTE (DESKTOP E SMARTPHONE) ---
+// Su ogni dispositivo tutte le voci del menu sono presenti insieme,
+// ciascuna nella propria posizione dell'ellisse (item.left/item.top), e
+// ognuna ha un proprio ciclo di comparsa/scomparsa ogni 3 secondi,
+// INDIPENDENTE dalle altre: non esiste piu' una singola voce "attiva" che
+// si sposta - ogni voce vive e si anima per conto suo. Quando il cursore
+// (su desktop/dispositivi con hover vero) passa sopra una voce, si blocca
+// SOLO il timer di QUELLA voce (resta visibile finche' il cursore non se
+// ne va); le altre continuano il proprio ciclo di 3 secondi normalmente.
+// Su smartphone (nessun hover reale) il tocco fa comunque ruotare la
+// voce e aprire il popup di download, ma non mette mai in pausa il ciclo
+// (esattamente come accadeva prima per il tocco sulla voce attiva).
 const DESKTOP_CYCLE_MS = 3000
 
-function DesktopMenuItem({
+function EllipticalMenuItem({
     item,
     index,
     totalItems,
     textColor,
     markerColor,
-    fontSize,
     markerWidth,
     edgeInset,
     canHover,
+    isPhone,
+    horizontalGutter,
+    phoneMaxLabelWidth,
+    computedFontSize,
     onDownloadClick,
 }) {
     const [hasStarted, setHasStarted] = useState(false)
@@ -821,7 +539,7 @@ function DesktopMenuItem({
     // Ciclo continuo comparsa/scomparsa, ogni 3 secondi, dopo l'accensione
     // iniziale. Si sospende (si "congela" cosi' com'e') finche' il cursore
     // resta sopra la voce - stessa identica logica gia' usata nel resto
-    // del sito (es. handleLabelHoverEnter/Leave del menu mobile).
+    // del sito (stessa logica di pausa-al-hover usata anche altrove nel sito).
     useEffect(() => {
         if (!hasStarted) return
         if (typeof window === "undefined") return
@@ -861,7 +579,13 @@ function DesktopMenuItem({
     )
 
     const isGlowActive = isHovered && canHover
-    const computedFontSize = `${Math.max(18, fontSize)}px`
+    // Stessa formula di clamp gia' usata in origine per la voce mobile:
+    // su smartphone lascia spazio a destra per l'eventuale testo lungo
+    // (phoneMaxLabelWidth), su desktop resta centrata sul suo punto
+    // dell'ellisse.
+    const safeLeft = isPhone
+        ? `clamp(${horizontalGutter}px, ${item.left}, calc(100% - ${horizontalGutter + phoneMaxLabelWidth}px))`
+        : `clamp(${edgeInset}px, ${item.left}, calc(100% - ${edgeInset}px))`
 
     return (
         <motion.a
@@ -876,9 +600,11 @@ function DesktopMenuItem({
             style={{
                 position: "absolute",
                 zIndex: 2,
-                left: `clamp(${edgeInset}px, ${item.left}, calc(100% - ${edgeInset}px))`,
+                left: safeLeft,
                 top: `clamp(10px, ${item.top}, calc(100% - 10px))`,
-                transform: "translate(-50%, -50%)",
+                transform: isPhone
+                    ? "translate(0%, -50%)"
+                    : "translate(-50%, -50%)",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 10,
@@ -886,11 +612,17 @@ function DesktopMenuItem({
                 color: textColor,
                 textTransform: "uppercase",
                 letterSpacing: "0.7px",
-                whiteSpace: "nowrap",
+                whiteSpace: isPhone && isDownloadPortfolio ? "normal" : "nowrap",
+                width:
+                    isPhone && isDownloadPortfolio
+                        ? `${phoneMaxLabelWidth}px`
+                        : "auto",
+                maxWidth: isPhone ? `${phoneMaxLabelWidth}px` : "none",
+                minWidth: isPhone ? "0" : "max-content",
                 fontSize: computedFontSize,
                 fontFamily: "Inter, Helvetica, Arial, sans-serif",
                 fontWeight: 500,
-                textAlign: "left",
+                textAlign: isPhone && isDownloadPortfolio ? "center" : "left",
                 perspective: 700,
                 // Finche' e' invisibile non deve intercettare click/hover:
                 // altrimenti una voce "spenta" bloccherebbe il passaggio
@@ -1019,8 +751,8 @@ function DesktopMenuItem({
  *   terzo video, aggiungi un nuovo import e una nuova voce in
  *   VIDEO_SOURCES/VIDEO_PLAYLIST.
  * - mobile.mp4 (in src/assets/videos/mobile.mp4) e' un video verticale
- *   dedicato, usato SOLO su smartphone (isPhone, viewportWidth <= 520)
- *   al posto del ciclo selected-works/exhibitions. E' in loop singolo
- *   (loop={isPhone}), non avanza la playlist desktop. Su desktop/tablet
- *   il comportamento resta identico a prima.
+ *   dedicato, usato SOLO su smartphone/tablet stretti (isPhone,
+ *   viewportWidth <= 768) al posto del ciclo selected-works/exhibitions.
+ *   E' in loop singolo (loop={isPhone}), non avanza la playlist desktop.
+ *   Su desktop il comportamento resta identico a prima.
  */
