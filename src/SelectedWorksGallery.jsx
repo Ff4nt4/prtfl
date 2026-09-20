@@ -23,7 +23,7 @@ const SELECTED_WORKS = [
     { image: img1, title: "Conduttura (2026)" },
     { image: img2, title: "Pozzanghera (2026)" },
     { image: img3, title: "Colli (2026)" },
-    { image: img4, title: "Ugly tear (2026)" },
+    { image: img4, title: "Sweat in swelter (2026)" },
     { image: img5, title: "Lil’ fly lying in the eye (2026)" },
     {
         image: img6,
